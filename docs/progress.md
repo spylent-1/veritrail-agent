@@ -7,7 +7,8 @@
 | T01 工程、配置、CLI、doctor、CI | 本地验收通过 | 5 tests；Ruff / format / mypy 通过；doctor 无远端请求 |
 | T02 工作区边界 | 本地验收通过 | 累计 31 tests；真实 Windows junction、越界、敏感过滤、BOM/CRLF；质量门禁通过 |
 | T03 消息与 Provider 契约 | 本地验收通过 | 累计 37 tests；消息配对、重复 ID、ScriptedFake；质量门禁通过 |
-| T04–T06 只读 Agent 与持久化 | 待实现 | |
+| T04 读取工具与统一执行入口 | 本地验收通过 | 累计 41 tests；真实 rg、参数/权限、密钥过滤；质量门禁通过 |
+| T05–T06 只读循环与持久化 | 待实现 | |
 | T07–T10 编辑和测试 | 待实现 | |
 | T11–T12 恢复和上下文 | 待实现 | |
 | T13–T14 MCP | 待实现 | |
