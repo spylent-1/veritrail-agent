@@ -12,7 +12,7 @@ import typer
 from rich.console import Console
 
 from repopilot import __version__
-from repopilot.application import run_task
+from repopilot.application import rollback_run, run_task
 from repopilot.config import api_key, load_settings, state_home
 from repopilot.deepseek import DeepSeekProvider
 from repopilot.errors import RepoPilotError
@@ -122,6 +122,67 @@ def sessions() -> None:
             console.print(f"{session['id']}  {session['workspace']}  {session['title']}")
     finally:
         store.close()
+
+
+@app.command()
+def resume(session_id: str, task: str | None = typer.Option(None, "--task")) -> None:
+    """Inspect saved state, then continue with new input; never automatically replay."""
+    store = SessionStore(state_home())
+    try:
+        session = store.session(session_id)
+        runs = store.runs(session_id)
+        console.print(f"Session: {session_id}; workspace: {session['workspace']}")
+        console.print(f"Last run: {runs[-1]['status'] if runs else 'none'}; approvals expired.")
+    except RepoPilotError as exc:
+        console.print(f"{exc.code}: {exc}")
+        raise typer.Exit(2) from None
+    finally:
+        store.close()
+    if task is None:
+        if not sys.stdin.isatty():
+            console.print("Use --task to continue noninteractively; side effects remain denied.")
+            return
+        task = typer.prompt("Next task")
+
+    async def execute() -> RunReport:
+        settings = load_settings()
+        key = api_key()
+        if not key:
+            raise RepoPilotError("KEY_MISSING", "Set DEEPSEEK_API_KEY.")
+        provider = DeepSeekProvider(settings.model, key)
+        try:
+            return await run_task(
+                task or "",
+                Path(session["workspace"]),
+                state_home(),
+                settings,
+                provider,
+                mode=runs[-1]["mode"] if runs else "read",
+                session_id=session_id,
+                approval=TerminalApproval(console),
+            )
+        finally:
+            await provider.close()
+
+    try:
+        report = asyncio.run(execute())
+        console.print(report.model_dump_json(indent=2))
+    except RepoPilotError as exc:
+        console.print(f"{exc.code}: {exc}")
+        raise typer.Exit(2) from None
+
+
+@app.command()
+def rollback(run_id: str) -> None:
+    """Review and restore only this run's confirmed file edits, with conflict checks."""
+    try:
+        report = asyncio.run(rollback_run(run_id, state_home(), TerminalApproval(console)))
+        console.print(report.model_dump_json(indent=2))
+        if report.status != "completed":
+            raise typer.Exit(1)
+    except RepoPilotError as exc:
+        console.print(f"{exc.code}: {exc}")
+        raise typer.Exit(2) from None
 
 
 @app.command()

@@ -164,3 +164,27 @@ class SessionStore:
     def report(self, run_id: str) -> RunReport | None:
         payload = self.run(run_id)["report"]
         return RunReport.model_validate_json(payload) if payload else None
+
+    def runs(self, session_id: str) -> list[JsonObject]:
+        return [
+            dict(row)
+            for row in self.db.execute(
+                "SELECT * FROM runs WHERE session_id=? ORDER BY rowid", (session_id,)
+            )
+        ]
+
+    def tools(self, run_id: str) -> list[JsonObject]:
+        return [
+            dict(row)
+            for row in self.db.execute(
+                "SELECT * FROM tool_executions WHERE run_id=? ORDER BY rowid", (run_id,)
+            )
+        ]
+
+    def host_tool(self, run_id: str, name: str, call_id: str) -> None:
+        with self.db:
+            self.db.execute(
+                "INSERT INTO tool_executions VALUES (?,?,?,?,?,NULL,NULL)",
+                (run_id, call_id, name, "{}", "proposed"),
+            )
+        self.record(run_id, "host_tool", {"name": name, "call_id": call_id})
