@@ -137,6 +137,19 @@ class AgentRunner:
                             and changed not in report.changed_files
                         ):
                             report.changed_files.append(changed)
+                            report.verification = "not_run"
+                        verification = result.data.get("verification")
+                        if result.status == "ok" and verification in (
+                            "passed",
+                            "failed",
+                            "not_run",
+                            "unknown",
+                        ):
+                            report.verification = verification
+                        elif call.name == "run_tests" and result.status != "ok":
+                            report.verification = (
+                                "unknown" if result.error_code == "TIMEOUT" else "not_run"
+                            )
                         if result.status != "ok":
                             signature = f"{call.name}:{call.arguments}:{result.error_code}"
                             streak = streak + 1 if signature == last_error else 1

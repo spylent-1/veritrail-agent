@@ -3,6 +3,7 @@
 import os
 import tomllib
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -27,9 +28,18 @@ class ModelSettings(StrictModel):
     base_url: str = "https://api.deepseek.com"
 
 
+class TestProfile(StrictModel):
+    kind: Literal["pytest", "maven"] = "pytest"
+    executable: str
+    args: list[str] = Field(default_factory=list)
+    cwd: str = "."
+    timeout: float = Field(default=180, gt=0, le=900)
+
+
 class Settings(StrictModel):
     model: ModelSettings = Field(default_factory=ModelSettings)
     limits: Limits = Field(default_factory=Limits)
+    tests: dict[str, TestProfile] = Field(default_factory=dict)
 
 
 def state_home() -> Path:

@@ -13,6 +13,7 @@ from repopilot.models import JsonObject, RunReport
 from repopilot.providers import ModelProvider
 from repopilot.safety import ApprovalHandler, PolicyEngine
 from repopilot.store import SessionStore
+from repopilot.test_runner import TestRunner
 from repopilot.tools import ReadTools, ToolExecutor, ToolRegistry
 from repopilot.workspace import Workspace, digest
 
@@ -50,6 +51,9 @@ async def run_task(
         readers.register(registry)
         if mode == "edit":
             Editor(workspace, readers, home / "runs" / run_id).register(registry)
+            TestRunner(
+                workspace, settings.tests, home / "runs" / run_id, settings.limits.output_bytes
+            ).register(registry)
 
         def record(kind: str, data: JsonObject) -> None:
             assert store is not None
