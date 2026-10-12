@@ -1,12 +1,12 @@
 """Explicit sequential tool loop. A completed answer is not a passing test result."""
 
 import asyncio
-import json
 import time
 import uuid
 from collections.abc import Callable
 
 from repopilot.config import Limits
+from repopilot.context import ContextBuilder
 from repopilot.errors import RepoPilotError
 from repopilot.models import JsonObject, Message, RunReport, ToolResult
 from repopilot.providers import ModelProvider
@@ -66,24 +66,38 @@ class AgentRunner:
         self.append(Message(role="user", content=request))
         seen = {c.id for m in self.messages for c in m.tool_calls}
         started = time.monotonic()
+        approval_start = self.executor.approval_seconds
+
+        def remaining_time() -> float:
+            return self.limits.active_seconds - (
+                time.monotonic() - started - (self.executor.approval_seconds - approval_start)
+            )
+
         streak = 0
         last_error = ""
         try:
             for _ in range(self.limits.model_turns):
-                remaining = self.limits.active_seconds - (time.monotonic() - started)
+                remaining = remaining_time()
                 if remaining <= 0:
                     raise RepoPilotError("TIME_BUDGET", "Task active time budget exhausted.")
-                if (
-                    len(json.dumps([m.wire() for m in self.messages], ensure_ascii=False).encode())
-                    > self.limits.context_bytes
-                ):
-                    raise RepoPilotError("CONTEXT_BUDGET", "Context capacity exceeded.")
+                context = ContextBuilder(self.limits.context_bytes).build(
+                    self.messages, self.executor.registry.list()
+                )
+                self.emit(
+                    "context_built",
+                    {
+                        "bytes": context.bytes,
+                        "original_bytes": context.original_bytes,
+                        "omitted_turns": context.omitted_turns,
+                    },
+                )
                 self.emit("model_started", {"turn": report.model_turns + 1})
                 async with asyncio.timeout(min(remaining, self.limits.model_timeout)):
                     turn = await self.provider.complete(
-                        self.messages, self.executor.registry.list(), self.limits
+                        context.messages, context.tools, self.limits
                     )
                 report.model_turns += 1
+                report.usage_complete &= turn.usage_complete
                 if turn.usage:
                     report.usage.input_tokens += turn.usage.input_tokens
                     report.usage.output_tokens += turn.usage.output_tokens
@@ -127,7 +141,27 @@ class AgentRunner:
                         )
                     else:
                         self.emit("tool_started", {"call_id": call.id, "name": call.name})
-                        result = await self.executor.execute(call)
+                        try:
+                            result = await self.executor.execute(call, remaining_time())
+                        except asyncio.CancelledError:
+                            result = ToolResult(
+                                call_id=call.id,
+                                status="unknown",
+                                error_code="USER_CANCELLED",
+                                message="Cancelled operation; inspect state.",
+                            )
+                            self.append(result.message_for_model())
+                            self.emit("tool_finished", result.model_dump())
+                            for pending_call in turn.tool_calls[turn.tool_calls.index(call) + 1 :]:
+                                skipped = ToolResult(
+                                    call_id=pending_call.id,
+                                    status="skipped",
+                                    error_code="USER_CANCELLED",
+                                    message="Not executed after cancellation.",
+                                )
+                                self.append(skipped.message_for_model())
+                                self.emit("tool_finished", skipped.model_dump())
+                            raise
                         report.tool_calls += 1
                         report.evidence.extend(result.evidence)
                         changed = result.data.get("changed_file")
@@ -161,6 +195,8 @@ class AgentRunner:
                     self.emit("tool_finished", result.model_dump())
                 if exhausted or report.tool_calls >= self.limits.tool_calls:
                     raise RepoPilotError("TOOL_BUDGET", "Tool call budget exhausted.")
+                if remaining_time() <= 0:
+                    raise RepoPilotError("TIME_BUDGET", "Task active time budget exhausted.")
                 if streak >= 3:
                     raise RepoPilotError(
                         "REPEATED_FAILURE", "Same tool failure repeated three times."
@@ -172,8 +208,11 @@ class AgentRunner:
             report.stop_reason = "USER_CANCELLED"
         except TimeoutError:
             report.stop_reason = "MODEL_TIMEOUT"
+            report.usage_complete = False
         except RepoPilotError as exc:
             report.stop_reason = exc.code
+            if exc.code in ("PROVIDER_ERROR", "MODEL_REFUSAL", "EMPTY_RESPONSE"):
+                report.usage_complete = False
             report.warnings.append(clean(str(exc)))
             if exc.code.endswith("BUDGET"):
                 report.status = "budget_exhausted"

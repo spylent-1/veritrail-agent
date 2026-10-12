@@ -55,6 +55,7 @@ class DeepSeekProvider:
                         )
                     )
                 return ModelTurn(
+                    usage_complete=attempt == 0,
                     content=message.content or "",
                     tool_calls=calls,
                     finish_reason=choice.finish_reason,

@@ -51,6 +51,7 @@ class ModelTurn(StrictModel):
     tool_calls: list[ToolCall] = Field(default_factory=list)
     finish_reason: str = "stop"
     usage: Usage | None = None
+    usage_complete: bool = True
 
 
 class EvidenceRef(StrictModel):

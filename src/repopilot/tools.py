@@ -81,7 +81,20 @@ class ToolExecutor:
         self.on_event = on_event or (lambda kind, data: None)
         self.approval_seconds = 0.0
 
-    async def execute(self, call: ToolCall) -> ToolResult:
+    async def execute(self, call: ToolCall, active_budget: float | None = None) -> ToolResult:
+        started = time.monotonic()
+        approval_before = self.approval_seconds
+
+        def deadline(default: float) -> float:
+            if active_budget is None:
+                return default
+            remaining = active_budget - (
+                time.monotonic() - started - (self.approval_seconds - approval_before)
+            )
+            if remaining <= 0:
+                raise RepoPilotError("TIME_BUDGET", "Active task time exhausted.")
+            return min(default, remaining)
+
         try:
             tool = self.registry.get(call.name)
             decision = self.policy.evaluate(tool.risk)
@@ -96,12 +109,12 @@ class ToolExecutor:
                 raise RepoPilotError("INVALID_ARGUMENTS", "Tool arguments exceed the limit.")
             args = tool.args_type.model_validate_json(call.arguments, strict=True).model_dump()
             if decision == "allow":
-                async with asyncio.timeout(self.limits.tool_timeout):
+                async with asyncio.timeout(deadline(self.limits.tool_timeout)):
                     output = await tool.handler(args)
             else:
                 if not tool.prepare:
                     raise RepoPilotError("UNSAFE_TOOL", "Side effects require a prepared action.")
-                async with asyncio.timeout(self.limits.tool_timeout):
+                async with asyncio.timeout(deadline(self.limits.tool_timeout)):
                     action = await tool.prepare(args)
                 if action.risk != tool.risk:
                     raise RepoPilotError("UNSAFE_TOOL", "Prepared risk does not match tool policy.")
@@ -128,7 +141,7 @@ class ToolExecutor:
                     "tool_intent",
                     {"call_id": call.id, "fingerprint": fingerprint, "intent": action.intent},
                 )
-                async with asyncio.timeout(action.timeout):
+                async with asyncio.timeout(deadline(action.timeout)):
                     output = await action.commit()
             result = ToolResult(
                 call_id=call.id,

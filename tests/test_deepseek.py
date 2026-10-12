@@ -45,6 +45,7 @@ async def test_sdk_request_contract_and_bounded_retry():
         turn = await provider.complete([Message(role="user", content="hello")], [], Limits())
         assert turn.content == "ok" and turn.usage.input_tokens == 12
         assert len(requests) == 3
+        assert turn.usage_complete is False
         assert requests[0]["thinking"] == {"type": "disabled"}
         assert requests[0]["model"] == "deepseek-flash"
     finally:
