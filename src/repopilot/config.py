@@ -36,10 +36,18 @@ class TestProfile(StrictModel):
     timeout: float = Field(default=180, gt=0, le=900)
 
 
+class McpServer(StrictModel):
+    executable: str
+    args: list[str] = Field(default_factory=list)
+    tools: list[str] = Field(default_factory=list)
+    timeout: float = Field(default=20, gt=0, le=180)
+
+
 class Settings(StrictModel):
     model: ModelSettings = Field(default_factory=ModelSettings)
     limits: Limits = Field(default_factory=Limits)
     tests: dict[str, TestProfile] = Field(default_factory=dict)
+    mcp: dict[str, McpServer] = Field(default_factory=dict)
 
 
 def state_home() -> Path:

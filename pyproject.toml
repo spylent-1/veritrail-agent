@@ -14,13 +14,21 @@ dependencies = [
     "pydantic>=2.11,<3",
     "filelock>=3.18,<4",
     "openai>=2,<3",
+    "mcp>=2.3,<3",
+    "jsonschema>=4,<5",
 ]
 
 [project.scripts]
 repopilot = "repopilot.cli:app"
 
 [dependency-groups]
-dev = ["pytest>=8.4,<10", "pytest-asyncio>=1,<2", "ruff>=0.12,<1", "mypy>=1.16,<2"]
+dev = [
+    "pytest>=8.4,<10",
+    "pytest-asyncio>=1,<2",
+    "ruff>=0.12,<1",
+    "mypy>=1.16,<2",
+    "types-jsonschema>=4.26.0.20261006",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/repopilot"]
