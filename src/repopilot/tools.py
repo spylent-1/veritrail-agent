@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import shutil
 import subprocess
 import time
 from collections.abc import Awaitable, Callable
@@ -182,6 +183,10 @@ class GrepArgs(StrictModel):
     limit: int = Field(default=30, ge=1, le=100)
 
 
+class DiffArgs(StrictModel):
+    path: str = "."
+
+
 class ReadTools:
     def __init__(self, workspace: Workspace) -> None:
         self.workspace = workspace
@@ -285,7 +290,61 @@ class ReadTools:
         refs = [self._ref(m["path"], m["line"], m["line"], m["sha256"]) for m in matches]
         return ToolOutput({"matches": matches}, refs, len(matches) >= args["limit"])
 
+    async def git_diff(self, args: JsonObject) -> ToolOutput:
+        git = shutil.which("git")
+        if not git:
+            raise RepoPilotError("GIT_MISSING", "Install Git first.")
+        selected = self.workspace.resolve(args["path"], allow_root=True)
+        candidates = (
+            self.workspace.list_files(args["path"], limit=201)
+            if selected.is_dir()
+            else [selected.relative_to(self.workspace.root).as_posix()]
+        )
+        if len(candidates) > 200:
+            raise RepoPilotError("DIFF_TOO_BROAD", "Specify a smaller directory or file.")
+        diffs: list[str] = []
+        for relative in candidates:
+            self.workspace.snapshot(relative)
+            result = await asyncio.to_thread(
+                subprocess.run,
+                [
+                    git,
+                    "-c",
+                    "core.fsmonitor=false",
+                    "diff",
+                    "--no-ext-diff",
+                    "--no-textconv",
+                    "--",
+                    relative,
+                ],
+                cwd=self.workspace.root,
+                capture_output=True,
+                timeout=5,
+                check=False,
+            )
+            if result.returncode:
+                raise RepoPilotError("GIT_DIFF_FAILED", "Git diff failed; check repository setup.")
+            diffs.append(result.stdout.decode("utf-8", errors="replace"))
+            if sum(len(part.encode()) for part in diffs) >= 16384:
+                break
+        raw = "".join(diffs).encode()
+        return ToolOutput(
+            {
+                "diff": raw[:16384].decode("utf-8", errors="ignore"),
+                "scope": "Git working tree; may include pre-existing user changes.",
+            },
+            truncated=len(raw) > 16384,
+        )
+
     def register(self, registry: ToolRegistry) -> None:
+        registry.register(
+            ToolDefinition(
+                "git_diff",
+                "Read Git changes for eligible files; these may include pre-existing user edits.",
+                DiffArgs,
+                self.git_diff,
+            )
+        )
         registry.register(
             ToolDefinition(
                 "list_files", "List visible files in the workspace.", ListArgs, self.list_files

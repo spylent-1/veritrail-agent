@@ -18,6 +18,7 @@ from repopilot.deepseek import DeepSeekProvider
 from repopilot.errors import RepoPilotError
 from repopilot.models import JsonObject, RunReport
 from repopilot.store import SessionStore
+from repopilot.ui import TerminalApproval
 
 app = typer.Typer(no_args_is_help=True, help="RepoPilot: inspect, edit and verify trusted code.")
 console = Console(markup=False, highlight=False)
@@ -68,8 +69,8 @@ def run(
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
     """Ask the model to inspect code using constrained workspace tools."""
-    if mode != "read":
-        console.print("This development milestone supports --mode read only.")
+    if mode not in ("read", "edit"):
+        console.print("Choose --mode read or edit.")
         raise typer.Exit(2)
 
     def show_event(kind: str, data: JsonObject) -> None:
@@ -83,7 +84,16 @@ def run(
             raise RepoPilotError("KEY_MISSING", "Set DEEPSEEK_API_KEY in the host environment.")
         provider = DeepSeekProvider(settings.model, key)
         try:
-            return await run_task(task, workspace, state_home(), settings, provider, show_event)
+            return await run_task(
+                task,
+                workspace,
+                state_home(),
+                settings,
+                provider,
+                show_event,
+                mode=mode,
+                approval=TerminalApproval(console),
+            )
         finally:
             await provider.close()
 

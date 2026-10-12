@@ -7,9 +7,11 @@ from filelock import FileLock, Timeout
 
 from repopilot.agent import AgentRunner, EventSink
 from repopilot.config import Settings
+from repopilot.editor import Editor
 from repopilot.errors import RepoPilotError
 from repopilot.models import JsonObject, RunReport
 from repopilot.providers import ModelProvider
+from repopilot.safety import ApprovalHandler, PolicyEngine
 from repopilot.store import SessionStore
 from repopilot.tools import ReadTools, ToolExecutor, ToolRegistry
 from repopilot.workspace import Workspace, digest
@@ -22,7 +24,12 @@ async def run_task(
     settings: Settings,
     provider: ModelProvider,
     on_event: EventSink | None = None,
+    *,
+    mode: str = "read",
+    approval: ApprovalHandler | None = None,
 ) -> RunReport:
+    if mode not in ("read", "edit"):
+        raise RepoPilotError("INVALID_MODE", "Choose read or edit mode.")
     workspace = Workspace(root, excluded_roots=(home,))
     locks = home / "locks"
     locks.mkdir(parents=True, exist_ok=True)
@@ -37,10 +44,12 @@ async def run_task(
     try:
         store = SessionStore(home)
         session_id = store.create_session(workspace.root, task)
-        run_id = store.start_run(session_id, "read", settings.model_dump())
+        run_id = store.start_run(session_id, mode, settings.model_dump())
         registry = ToolRegistry()
         readers = ReadTools(workspace)
         readers.register(registry)
+        if mode == "edit":
+            Editor(workspace, readers, home / "runs" / run_id).register(registry)
 
         def record(kind: str, data: JsonObject) -> None:
             assert store is not None
@@ -50,7 +59,16 @@ async def run_task(
                 on_event(kind, data)
 
         runner = AgentRunner(
-            provider, ToolExecutor(registry, settings.limits), settings.limits, record
+            provider,
+            ToolExecutor(
+                registry,
+                settings.limits,
+                policy=PolicyEngine("edit" if mode == "edit" else "read"),
+                approval=approval,
+                on_event=record,
+            ),
+            settings.limits,
+            record,
         )
         report = await runner.run(task, session_id, run_id=run_id)
         refs = {e.id: e for e in report.evidence}

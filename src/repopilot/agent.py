@@ -130,6 +130,13 @@ class AgentRunner:
                         result = await self.executor.execute(call)
                         report.tool_calls += 1
                         report.evidence.extend(result.evidence)
+                        changed = result.data.get("changed_file")
+                        if (
+                            result.status == "ok"
+                            and changed
+                            and changed not in report.changed_files
+                        ):
+                            report.changed_files.append(changed)
                         if result.status != "ok":
                             signature = f"{call.name}:{call.arguments}:{result.error_code}"
                             streak = streak + 1 if signature == last_error else 1
