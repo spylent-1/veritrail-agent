@@ -9,6 +9,8 @@ from repopilot.agent import AgentRunner, EventSink
 from repopilot.config import Settings
 from repopilot.editor import Editor
 from repopilot.errors import RepoPilotError
+from repopilot.mcp_adapter import McpAdapter
+from repopilot.mcp_connection import McpConnection
 from repopilot.models import JsonObject, RunReport
 from repopilot.providers import ModelProvider
 from repopilot.recovery import history_evidence, prepare_rollback, reconcile_session
@@ -30,6 +32,7 @@ async def run_task(
     mode: str = "read",
     approval: ApprovalHandler | None = None,
     session_id: str | None = None,
+    mcp_names: list[str] | None = None,
 ) -> RunReport:
     if mode not in ("read", "edit"):
         raise RepoPilotError("INVALID_MODE", "Choose read or edit mode.")
@@ -44,6 +47,8 @@ async def run_task(
             "WORKSPACE_BUSY", "Another RepoPilot run holds this workspace."
         ) from None
     store: SessionStore | None = None
+    connections: list[McpConnection] = []
+    startup_warnings: list[str] = []
     try:
         store = SessionStore(home)
         history = []
@@ -71,12 +76,61 @@ async def run_task(
             if on_event:
                 on_event(kind, data)
 
+        for name in dict.fromkeys(mcp_names or []):
+            from repopilot.config import StrictModel
+            from repopilot.models import ToolCall
+            from repopilot.tools import ToolDefinition, ToolOutput
+
+            if name not in settings.mcp:
+                raise RepoPilotError(
+                    "MCP_NOT_CONFIGURED", "MCP server is not in host configuration."
+                )
+            connection = McpConnection(settings.mcp[name], workspace.root)
+            connections.append(connection)
+            adapter = McpAdapter(name, connection, registry, settings.limits.output_bytes)
+            action = adapter.start_action()
+            startup_registry = ToolRegistry()
+
+            async def prepare_start(
+                args: JsonObject, prepared: PreparedAction = action
+            ) -> PreparedAction:
+                return prepared
+
+            async def no_start_bypass(args: JsonObject) -> ToolOutput:
+                raise RepoPilotError("UNSAFE_TOOL", "MCP startup requires approval.")
+
+            startup_registry.register(
+                ToolDefinition(
+                    "start_mcp",
+                    "Host MCP startup",
+                    StrictModel,
+                    no_start_bypass,
+                    "external",
+                    prepare_start,
+                )
+            )
+            identifier = f"host_mcp_{name}"
+            store.host_tool(run_id, "start_mcp", identifier)
+            record("tool_started", {"call_id": identifier, "name": "start_mcp"})
+            startup_result = await ToolExecutor(
+                startup_registry,
+                settings.limits,
+                policy=PolicyEngine(allow_external=True),
+                approval=approval,
+                on_event=record,
+            ).execute(ToolCall(id=identifier, name="start_mcp", arguments="{}"))
+            record("tool_finished", startup_result.model_dump())
+            if startup_result.status != "ok":
+                startup_warnings.append(f"MCP {name}: {startup_result.error_code}")
+
         runner = AgentRunner(
             provider,
             ToolExecutor(
                 registry,
                 settings.limits,
-                policy=PolicyEngine("edit" if mode == "edit" else "read"),
+                policy=PolicyEngine(
+                    "edit" if mode == "edit" else "read", allow_external=bool(mcp_names)
+                ),
                 approval=approval,
                 on_event=record,
             ),
@@ -84,6 +138,7 @@ async def run_task(
             record,
         )
         report = await runner.run(task, session_id, run_id=run_id, history=history)
+        report.warnings.extend(startup_warnings)
         refs = {e.id: e for e in readers.evidence}
         for identifier in set(re.findall(r"\[(E\d+)\]", report.answer)):
             if identifier not in refs:
@@ -100,6 +155,8 @@ async def run_task(
         store.record(run_id, "run_finished", report.model_dump())
         return report
     finally:
+        for connection in reversed(connections):
+            await connection.close()
         if store:
             store.close()
         lock.release()

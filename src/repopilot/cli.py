@@ -67,6 +67,7 @@ def run(
     workspace: Annotated[Path, typer.Option("--workspace")] = Path("."),
     mode: str = typer.Option("read", "--mode"),
     json_output: bool = typer.Option(False, "--json"),
+    mcp: Annotated[list[str] | None, typer.Option("--mcp")] = None,
 ) -> None:
     """Ask the model to inspect code using constrained workspace tools."""
     if mode not in ("read", "edit"):
@@ -93,6 +94,7 @@ def run(
                 show_event,
                 mode=mode,
                 approval=TerminalApproval(console),
+                mcp_names=mcp,
             )
         finally:
             await provider.close()

@@ -34,6 +34,8 @@ class ToolDefinition:
     handler: Callable[[JsonObject], Awaitable[ToolOutput]]
     risk: Literal["read", "write", "execute", "external"] = "read"
     prepare: Callable[[JsonObject], Awaitable[PreparedAction]] | None = None
+    custom_schema: JsonObject | None = None
+    validate_args: Callable[[JsonObject], JsonObject] | None = None
 
     def wire(self) -> JsonObject:
         return {
@@ -41,7 +43,7 @@ class ToolDefinition:
             "function": {
                 "name": self.name,
                 "description": self.description,
-                "parameters": self.args_type.model_json_schema(),
+                "parameters": self.custom_schema or self.args_type.model_json_schema(),
             },
         }
 
@@ -107,7 +109,15 @@ class ToolExecutor:
                 )
             if len(call.arguments.encode()) > self.limits.context_bytes:
                 raise RepoPilotError("INVALID_ARGUMENTS", "Tool arguments exceed the limit.")
-            args = tool.args_type.model_validate_json(call.arguments, strict=True).model_dump()
+            if tool.validate_args:
+                raw = json.loads(call.arguments)
+                if not isinstance(raw, dict):
+                    raise RepoPilotError(
+                        "INVALID_ARGUMENTS", "MCP arguments must be a JSON object."
+                    )
+                args = tool.validate_args(raw)
+            else:
+                args = tool.args_type.model_validate_json(call.arguments, strict=True).model_dump()
             if decision == "allow":
                 async with asyncio.timeout(deadline(self.limits.tool_timeout)):
                     output = await tool.handler(args)
@@ -150,7 +160,7 @@ class ToolExecutor:
                 truncated=output.truncated,
             )
             return ToolResult.model_validate(clean_data(result.model_dump()))
-        except ValidationError:
+        except (ValidationError, json.JSONDecodeError, RecursionError, UnicodeError):
             return ToolResult(
                 call_id=call.id,
                 status="error",
@@ -159,7 +169,10 @@ class ToolExecutor:
             )
         except RepoPilotError as exc:
             return ToolResult(
-                call_id=call.id, status="error", error_code=exc.code, message=clean(str(exc))
+                call_id=call.id,
+                status="unknown" if exc.code == "MCP_OUTCOME_UNKNOWN" else "error",
+                error_code=exc.code,
+                message=clean(str(exc)),
             )
         except (TimeoutError, subprocess.TimeoutExpired):
             return ToolResult(
