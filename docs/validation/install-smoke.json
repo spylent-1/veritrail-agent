@@ -1,0 +1,32 @@
+{
+  "version": "0.1.0",
+  "platform": "Windows",
+  "independent_venv": true,
+  "isolated_import": true,
+  "module_location": "D:\\PythonProjection\\AgentCli\\.eval-runs\\install-smoke\\.venv\\Lib\\site-packages\\repopilot\\__init__.py",
+  "commands_visible": [
+    "doctor",
+    "run",
+    "resume",
+    "sessions",
+    "trace",
+    "rollback"
+  ],
+  "doctor_without_key": {
+    "version": "0.1.0",
+    "python": "3.12.10",
+    "git": true,
+    "rg": true,
+    "java": true,
+    "maven": true,
+    "api_key_configured": false,
+    "model": "deepseek-flash",
+    "live_model_verified": false
+  },
+  "sessions_exit_code": 0,
+  "wheel_sha256": "3652bf159e178889f2c692ffd36b06b5a2d367cb37d76fb00cdb26e899335f15",
+  "wheel_excludes_evaluation_harness": true,
+  "live_model_called": false,
+  "sdist_excludes_private_runtime_directories": true,
+  "sdist_contains_lockfile_and_validation_docs": true
+}

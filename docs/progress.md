@@ -19,7 +19,7 @@
 | T13 stdio 生命周期 | 本地验收通过 | mcp 2.3.0；独立真实 Server 启动/发现/调用/关闭；异常启动结构化失败；legacy framing 无隐式工具重试 |
 | T14 MCP 统一工具执行 | 本地与真实调用通过 | 真实模型 2 轮、1 次 MCP 工具；审批/allow-list/Schema/Trace、超时/断连；外部内容不伪装文件证据 |
 | T15 评测与独立评分 | 本地验收通过 | 12 固定任务、每任务 3 次；独立 Python/Java 评分器分别拒绝 6 个故障版本、接受修复版本；固定起始提交 |
-| T16 真实评测与交付 | 待实施 | |
+| T16 真实评测与交付 | 本地与真实调用验收通过 | 113 tests；Ruff / format / Windows 与 Linux 平台 mypy 通过；wheel/sdist 构建、独立环境安装与 CLI 验证通过；36 次真实评测定位 15/18、修复 18/18；真实自维护＋会话继续通过 |
 
 不包含 RAG、长期 Memory、Skill、并行 Agent、自由 Shell 和生产沙箱。
 

@@ -19,4 +19,45 @@ python -m uv run mypy
 uv 在 PATH 时可以直接使用 `uv`。API Key 仅从宿主环境变量 `DEEPSEEK_API_KEY`
 读取，不加载目标仓库的 `.env`。宿主配置位于 `~/.repopilot/config.toml`。
 
-实现进度和验证边界见 [开发记录](docs/progress.md)。
+## 使用
+
+```powershell
+python -m uv run repopilot run "追踪优惠券领取调用链，引用源码行号" --workspace D:\YourJavaRepo
+python -m uv run repopilot run "定位 bug，审批后局部修复并运行 java-unit" --workspace D:\YourJavaRepo --mode edit
+python -m uv run repopilot sessions
+python -m uv run repopilot resume <session-id>
+python -m uv run repopilot trace <run-id> --jsonl
+python -m uv run repopilot rollback <run-id>
+```
+
+先运行 doctor。测试命令必须配置在宿主 config.toml 中，模型只能选择配置名；示例见
+[config.example.toml](docs/config.example.toml)，修改为自己的绝对解释器/Maven 路径。
+输入 edit 不等于自动批准，具体差异及测试命令仍需确认；管道或非交互模式拒绝副作用。
+
+如需 MCP，在宿主配置增加 Server，并使用 `--mcp docs` 显式选择：
+
+```toml
+[mcp.docs]
+executable = 'D:\PythonProjection\AgentCli\.venv\Scripts\python.exe'
+args = ['-m', 'repopilot.mcp_sample', '--root', 'D:\PythonProjection\AgentCli\docs']
+tools = ['get_project_conventions']
+timeout = 20
+```
+
+Server 启动和工具调用分别审批。不会自动执行目标仓库里的配置，也不会自动安装外部 Server。
+
+## 评测与交付
+
+```powershell
+python -m uv run python -m evals.run --check-graders
+python -m uv run python -m evals.run --repeats 3 --output .eval-runs/live
+python -m uv build
+```
+
+评测是 12 个固定 Java/Python 样例各重复 3 次。运行会调用真实模型；完整结果、SQLite、Trace
+及工作区保存在指定目录。独立评分器位于模型工作区之外。部分运行标记 partial，不算发行验收。
+首次 Maven 测试可能从 Maven 仓库下载已固定的依赖；“无模型测试”不等于所有环境都完全离线。
+
+实现进度见 [开发记录](docs/progress.md)，验证结果见 [验收记录](docs/validation.md)，
+调用链见 [架构](docs/architecture.md)，学习与面试练习见 [源码路线](docs/learning.md)，
+实际能力边界见 [信任边界](docs/security.md)。

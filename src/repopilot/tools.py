@@ -321,16 +321,27 @@ class ReadTools:
         if not git:
             raise RepoPilotError("GIT_MISSING", "Install Git first.")
         selected = self.workspace.resolve(args["path"], allow_root=True)
+        directory_scope = selected.is_dir()
         candidates = (
             self.workspace.list_files(args["path"], limit=201)
-            if selected.is_dir()
+            if directory_scope
             else [selected.relative_to(self.workspace.root).as_posix()]
         )
         if len(candidates) > 200:
             raise RepoPilotError("DIFF_TOO_BROAD", "Specify a smaller directory or file.")
         diffs: list[str] = []
         for relative in candidates:
-            self.workspace.snapshot(relative)
+            try:
+                self.workspace.snapshot(relative)
+            except RepoPilotError as exc:
+                # Directory-wide diff skips non-text or oversized files.
+                # Explicit file requests still surface the original error.
+                if not directory_scope or exc.code not in (
+                    "UNSUPPORTED_ENCODING",
+                    "FILE_TOO_LARGE",
+                ):
+                    raise
+                continue
             result = await asyncio.to_thread(
                 subprocess.run,
                 [

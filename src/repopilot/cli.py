@@ -13,7 +13,7 @@ from rich.console import Console
 
 from repopilot import __version__
 from repopilot.application import rollback_run, run_task
-from repopilot.config import api_key, load_settings, state_home
+from repopilot.config import Settings, api_key, load_settings, state_home
 from repopilot.deepseek import DeepSeekProvider
 from repopilot.errors import RepoPilotError
 from repopilot.models import JsonObject, RunReport
@@ -22,6 +22,15 @@ from repopilot.ui import TerminalApproval
 
 app = typer.Typer(no_args_is_help=True, help="RepoPilot: inspect, edit and verify trusted code.")
 console = Console(markup=False, highlight=False)
+
+
+def checked_settings() -> Settings:
+    try:
+        return load_settings()
+    except (ValueError, OSError):
+        raise RepoPilotError(
+            "CONFIG_ERROR", "Invalid host configuration; check config.toml."
+        ) from None
 
 
 @app.callback()
@@ -79,7 +88,7 @@ def run(
             console.print(f"{kind}: {data.get('name', data.get('turn', ''))}")
 
     async def execute() -> RunReport:
-        settings = load_settings()
+        settings = checked_settings()
         key = api_key()
         if not key:
             raise RepoPilotError("KEY_MISSING", "Set DEEPSEEK_API_KEY in the host environment.")
@@ -147,7 +156,7 @@ def resume(session_id: str, task: str | None = typer.Option(None, "--task")) -> 
         task = typer.prompt("Next task")
 
     async def execute() -> RunReport:
-        settings = load_settings()
+        settings = checked_settings()
         key = api_key()
         if not key:
             raise RepoPilotError("KEY_MISSING", "Set DEEPSEEK_API_KEY.")

@@ -33,6 +33,24 @@ dev = [
 [tool.hatch.build.targets.wheel]
 packages = ["src/repopilot"]
 
+[tool.hatch.build.targets.sdist]
+exclude = ["/.eval-runs/**", "/.venv/**", "/dist/**"]
+include = [
+    "src/repopilot",
+    "tests",
+    "evals",
+    "docs",
+    ".github",
+    "AGENTS.md",
+    "README.md",
+    "pyproject.toml",
+    "uv.lock",
+    ".python-version",
+    ".gitattributes",
+    ".gitignore",
+    ".env.example",
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]

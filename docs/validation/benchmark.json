@@ -1,0 +1,1182 @@
+{
+  "source_commit": "095e4027ec7773582feea0035f4bcc427ba3c93f",
+  "uv_lock_sha256": "3d9d487bff9b0e6e13a8bd433701c8930af467f575678a72673bd144fd40c7e5",
+  "model": "deepseek-flash",
+  "thinking": "disabled",
+  "repeats": 3,
+  "dataset_sha256": "052a273f1c05ec621b8cbce9a2a1d62b1b39bee8d664528f842bc72b895004d6",
+  "gate": "passed",
+  "counts": {
+    "locate": {
+      "passed": 15,
+      "total": 18
+    },
+    "edit": {
+      "passed": 18,
+      "total": 18
+    }
+  },
+  "stable_examples": [
+    "EJ1",
+    "EP1"
+  ],
+  "input_tokens": 402485,
+  "output_tokens": 32033,
+  "records": [
+    {
+      "case": "LJ1",
+      "kind": "locate",
+      "language": "java",
+      "attempt": 1,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 4,
+      "tool_calls": 10,
+      "duration": 11.203,
+      "usage": {
+        "input_tokens": 11542,
+        "output_tokens": 1462
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "05c8b4827d974d9581aea4cb764e1e7d",
+      "fixture_commit": "00117595bca1855612c1dd3a5daea6d1e9fcc536",
+      "artifacts": "LJ1-1-1791807419521460200"
+    },
+    {
+      "case": "LJ1",
+      "kind": "locate",
+      "language": "java",
+      "attempt": 2,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 5,
+      "tool_calls": 12,
+      "duration": 11.75,
+      "usage": {
+        "input_tokens": 18937,
+        "output_tokens": 1992
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "9deaceec44ab4417a840c916582545d2",
+      "fixture_commit": "00117595bca1855612c1dd3a5daea6d1e9fcc536",
+      "artifacts": "LJ1-2-1791807431674986000"
+    },
+    {
+      "case": "LJ1",
+      "kind": "locate",
+      "language": "java",
+      "attempt": 3,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 5,
+      "tool_calls": 9,
+      "duration": 11.625,
+      "usage": {
+        "input_tokens": 16511,
+        "output_tokens": 1816
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "9e6351957eea49a4ab06cfcf9fcb7f32",
+      "fixture_commit": "00117595bca1855612c1dd3a5daea6d1e9fcc536",
+      "artifacts": "LJ1-3-1791807444242944800"
+    },
+    {
+      "case": "LJ2",
+      "kind": "locate",
+      "language": "java",
+      "attempt": 1,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 3,
+      "tool_calls": 5,
+      "duration": 6.219,
+      "usage": {
+        "input_tokens": 6434,
+        "output_tokens": 898
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "b7765bbff68d45f48944ac79d63d57cd",
+      "fixture_commit": "00117595bca1855612c1dd3a5daea6d1e9fcc536",
+      "artifacts": "LJ2-1-1791807456712024000"
+    },
+    {
+      "case": "LJ2",
+      "kind": "locate",
+      "language": "java",
+      "attempt": 2,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 3,
+      "tool_calls": 4,
+      "duration": 5.203,
+      "usage": {
+        "input_tokens": 6128,
+        "output_tokens": 663
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "cb604a70bed24c78b2d823a20c8d46aa",
+      "fixture_commit": "00117595bca1855612c1dd3a5daea6d1e9fcc536",
+      "artifacts": "LJ2-2-1791807463740407200"
+    },
+    {
+      "case": "LJ2",
+      "kind": "locate",
+      "language": "java",
+      "attempt": 3,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 3,
+      "tool_calls": 8,
+      "duration": 6.906,
+      "usage": {
+        "input_tokens": 7262,
+        "output_tokens": 969
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "4947ff1a4942484180fb585ceca07109",
+      "fixture_commit": "00117595bca1855612c1dd3a5daea6d1e9fcc536",
+      "artifacts": "LJ2-3-1791807469774930000"
+    },
+    {
+      "case": "LJ3",
+      "kind": "locate",
+      "language": "java",
+      "attempt": 1,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 3,
+      "tool_calls": 4,
+      "duration": 6.312,
+      "usage": {
+        "input_tokens": 5368,
+        "output_tokens": 887
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "339331bd67a14af0a175293001a5e242",
+      "fixture_commit": "00117595bca1855612c1dd3a5daea6d1e9fcc536",
+      "artifacts": "LJ3-1-1791807477498171400"
+    },
+    {
+      "case": "LJ3",
+      "kind": "locate",
+      "language": "java",
+      "attempt": 2,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 3,
+      "tool_calls": 4,
+      "duration": 6.141,
+      "usage": {
+        "input_tokens": 5231,
+        "output_tokens": 924
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "3f3a7fe4ddab492ab4d67e94c3367fba",
+      "fixture_commit": "00117595bca1855612c1dd3a5daea6d1e9fcc536",
+      "artifacts": "LJ3-2-1791807484693588000"
+    },
+    {
+      "case": "LJ3",
+      "kind": "locate",
+      "language": "java",
+      "attempt": 3,
+      "passed": false,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 3,
+      "tool_calls": 5,
+      "duration": 7.938,
+      "usage": {
+        "input_tokens": 4499,
+        "output_tokens": 1062
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "41cb1cb72cce4b02b0cfb5ba55da2161",
+      "fixture_commit": "00117595bca1855612c1dd3a5daea6d1e9fcc536",
+      "artifacts": "LJ3-3-1791807491637627200"
+    },
+    {
+      "case": "LJ4",
+      "kind": "locate",
+      "language": "java",
+      "attempt": 1,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 3,
+      "tool_calls": 7,
+      "duration": 6.766,
+      "usage": {
+        "input_tokens": 5380,
+        "output_tokens": 1118
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "bb0c1424388a42d7b9f4e8489e308343",
+      "fixture_commit": "00117595bca1855612c1dd3a5daea6d1e9fcc536",
+      "artifacts": "LJ4-1-1791807500618054700"
+    },
+    {
+      "case": "LJ4",
+      "kind": "locate",
+      "language": "java",
+      "attempt": 2,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 3,
+      "tool_calls": 6,
+      "duration": 5.391,
+      "usage": {
+        "input_tokens": 4647,
+        "output_tokens": 827
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "f889f129399b4bf6b64b64f963819f33",
+      "fixture_commit": "00117595bca1855612c1dd3a5daea6d1e9fcc536",
+      "artifacts": "LJ4-2-1791807508263005700"
+    },
+    {
+      "case": "LJ4",
+      "kind": "locate",
+      "language": "java",
+      "attempt": 3,
+      "passed": false,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 3,
+      "tool_calls": 6,
+      "duration": 6.094,
+      "usage": {
+        "input_tokens": 4631,
+        "output_tokens": 864
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "9c061478ee4542ff92e7c29b03eb78da",
+      "fixture_commit": "00117595bca1855612c1dd3a5daea6d1e9fcc536",
+      "artifacts": "LJ4-3-1791807514469193400"
+    },
+    {
+      "case": "LP1",
+      "kind": "locate",
+      "language": "python",
+      "attempt": 1,
+      "passed": false,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 3,
+      "tool_calls": 4,
+      "duration": 5.203,
+      "usage": {
+        "input_tokens": 6320,
+        "output_tokens": 684
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "2051ce7901bf42569b9b966714c186c1",
+      "fixture_commit": "ca7edc045e1c0095df6e8f3c9749bb8a1c00bf63",
+      "artifacts": "LP1-1-1791807521335827800"
+    },
+    {
+      "case": "LP1",
+      "kind": "locate",
+      "language": "python",
+      "attempt": 2,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 3,
+      "tool_calls": 4,
+      "duration": 5.547,
+      "usage": {
+        "input_tokens": 6316,
+        "output_tokens": 617
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "7f837184fa744595ad58cb298504290c",
+      "fixture_commit": "ca7edc045e1c0095df6e8f3c9749bb8a1c00bf63",
+      "artifacts": "LP1-2-1791807527357421700"
+    },
+    {
+      "case": "LP1",
+      "kind": "locate",
+      "language": "python",
+      "attempt": 3,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 3,
+      "tool_calls": 3,
+      "duration": 4.453,
+      "usage": {
+        "input_tokens": 5807,
+        "output_tokens": 576
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "5133ec6eefbd4002a0985422a4ba68f2",
+      "fixture_commit": "ca7edc045e1c0095df6e8f3c9749bb8a1c00bf63",
+      "artifacts": "LP1-3-1791807533642657600"
+    },
+    {
+      "case": "LP2",
+      "kind": "locate",
+      "language": "python",
+      "attempt": 1,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 3,
+      "tool_calls": 4,
+      "duration": 6.297,
+      "usage": {
+        "input_tokens": 6772,
+        "output_tokens": 970
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "ae0b6743fe1c4f4e8602e4044ae124e9",
+      "fixture_commit": "ca7edc045e1c0095df6e8f3c9749bb8a1c00bf63",
+      "artifacts": "LP2-1-1791807538803063500"
+    },
+    {
+      "case": "LP2",
+      "kind": "locate",
+      "language": "python",
+      "attempt": 2,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 3,
+      "tool_calls": 4,
+      "duration": 6.922,
+      "usage": {
+        "input_tokens": 6617,
+        "output_tokens": 867
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "fc56c970f1c740c19bd5f26c0e22e13a",
+      "fixture_commit": "ca7edc045e1c0095df6e8f3c9749bb8a1c00bf63",
+      "artifacts": "LP2-2-1791807545914073800"
+    },
+    {
+      "case": "LP2",
+      "kind": "locate",
+      "language": "python",
+      "attempt": 3,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "not_run",
+      "model_turns": 4,
+      "tool_calls": 6,
+      "duration": 6.672,
+      "usage": {
+        "input_tokens": 5444,
+        "output_tokens": 853
+      },
+      "usage_complete": true,
+      "warnings": [],
+      "approval_decisions": [],
+      "run_id": "d4bf2a271a4e40baad6641b4eedab187",
+      "fixture_commit": "ca7edc045e1c0095df6e8f3c9749bb8a1c00bf63",
+      "artifacts": "LP2-3-1791807553593648600"
+    },
+    {
+      "case": "EJ1",
+      "kind": "edit",
+      "language": "java",
+      "attempt": 1,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 6,
+      "tool_calls": 8,
+      "duration": 20.469,
+      "usage": {
+        "input_tokens": 21235,
+        "output_tokens": 975
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E1",
+        "Stale evidence citation: E3"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "45351bd55db1a8ab69fb886c32fd9e4e762640542823e63e82a3ceb89106abe1"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "5402ad908c038a4a85f558203be3b9d9c08a6a116ae92ca4aa43ba630829f265"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "5547c4730b0fb6b4d311e1ba101bd4cc5ba0ef60cd783db18f9016825a2bbcad"
+        }
+      ],
+      "run_id": "60c369375e884976a2c53a1ddcef6818",
+      "fixture_commit": "cec7baee041ffd7ff3c3e1810e1f9ae6263add96",
+      "artifacts": "EJ1-1-1791807561030978800"
+    },
+    {
+      "case": "EJ1",
+      "kind": "edit",
+      "language": "java",
+      "attempt": 2,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 6,
+      "tool_calls": 9,
+      "duration": 15.891,
+      "usage": {
+        "input_tokens": 22532,
+        "output_tokens": 1178
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E1",
+        "Stale evidence citation: E4"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "47157b57836a3e99c1ecd2c6883906ad0467711dde596547baa931dcdec198b3"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "e03780b1b3c979fe1167304316256a267d4c3a7bb1018ec21b765a51a2ebc3d8"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "84c6ad26f4ac8e237050af680577d5a08629fadda67869349a97d8166619b02b"
+        }
+      ],
+      "run_id": "821d598a8c8240ebaa5782fd5d91731d",
+      "fixture_commit": "cec7baee041ffd7ff3c3e1810e1f9ae6263add96",
+      "artifacts": "EJ1-2-1791807582391876400"
+    },
+    {
+      "case": "EJ1",
+      "kind": "edit",
+      "language": "java",
+      "attempt": 3,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 5,
+      "tool_calls": 7,
+      "duration": 13.75,
+      "usage": {
+        "input_tokens": 15483,
+        "output_tokens": 825
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E1"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "31df6109c2bf510f766077341c106a395e36042006fddd7b7109f2373dbc2645"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "fd4682fb078d1a57d5e4107516bcfcded07193d9b40749b7707affda03822533"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "c5c33bc6753db9b296a653a752637e63b21e9dd94452eba961b2dd0e24bb0064"
+        }
+      ],
+      "run_id": "f79f0cd600cf431ab23124c21633aae2",
+      "fixture_commit": "cec7baee041ffd7ff3c3e1810e1f9ae6263add96",
+      "artifacts": "EJ1-3-1791807599132317400"
+    },
+    {
+      "case": "EJ2",
+      "kind": "edit",
+      "language": "java",
+      "attempt": 1,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 5,
+      "tool_calls": 6,
+      "duration": 14.671,
+      "usage": {
+        "input_tokens": 19343,
+        "output_tokens": 736
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E9",
+        "Stale evidence citation: E8"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "59396ee58110d66dd1d279df464fde7f0ffb1d2e0f9db85cd002a9e4600b788e"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "7aa5d2b2684142aadcb09c5709dd6c47c1ac939f086efcd4978260ee0d51cd37"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "26192e249a4d3b3d91b0e7ea84fb2c2bb7618fa7d204b53168e2e5e3ab661c02"
+        }
+      ],
+      "run_id": "59a4313413a649d2889e84bc0794f063",
+      "fixture_commit": "ac733f4545d967717d0e9bd1549bb457ac999494",
+      "artifacts": "EJ2-1-1791807613674070800"
+    },
+    {
+      "case": "EJ2",
+      "kind": "edit",
+      "language": "java",
+      "attempt": 2,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 5,
+      "tool_calls": 6,
+      "duration": 13.438,
+      "usage": {
+        "input_tokens": 14309,
+        "output_tokens": 734
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E2"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "f06cc0c075ced632c295a6779b50fbedbf03a10092af2c288dcc44b90fda5d86"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "05a61d2b74521f64a233f5535bd6798c838664f375438a0eac55f7062f2fd0f5"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "997d510bbbf29e111ef986a32fa252b1d27c98d5ac29979391174586acde7ef8"
+        }
+      ],
+      "run_id": "94ed058774c443418ab7f08b29491579",
+      "fixture_commit": "ac733f4545d967717d0e9bd1549bb457ac999494",
+      "artifacts": "EJ2-2-1791807629198046400"
+    },
+    {
+      "case": "EJ2",
+      "kind": "edit",
+      "language": "java",
+      "attempt": 3,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 5,
+      "tool_calls": 8,
+      "duration": 14.859,
+      "usage": {
+        "input_tokens": 16565,
+        "output_tokens": 971
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E1"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "23be83c731d80541be1b7fd37073b8c311540693b231707b7df27dabfaf5b1dd"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "674b29811f4e8936e325a13bdd706da7b4e2a89a68ca7a9f6ef4ce7c93208e87"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "860a6327a394887e9775113a8b7785fbb5361ae948572b6105adbbfea89d7de3"
+        }
+      ],
+      "run_id": "7a672c93915b4066b51080b8d59e58d4",
+      "fixture_commit": "ac733f4545d967717d0e9bd1549bb457ac999494",
+      "artifacts": "EJ2-3-1791807643487249400"
+    },
+    {
+      "case": "EJ3",
+      "kind": "edit",
+      "language": "java",
+      "attempt": 1,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 5,
+      "tool_calls": 6,
+      "duration": 14.735,
+      "usage": {
+        "input_tokens": 13816,
+        "output_tokens": 767
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E1"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "f3de86991b546cf15d4b5cf38c8e360b85523c1b87c2effdfbd87798b3c31ab7"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "89c441ba6d25dc95c01c2199f790d9065b97733a2b5bf8647be777d577e990fc"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "b211dbf0067c0ab5ec3768b2ff45cb67c693bd424230358a7e4ce2b27356ea6b"
+        }
+      ],
+      "run_id": "19f5d02049074f48879793e25b85a4c7",
+      "fixture_commit": "c200e2cab80cf9df6f36655b944269b0feef62d3",
+      "artifacts": "EJ3-1-1791807659190805300"
+    },
+    {
+      "case": "EJ3",
+      "kind": "edit",
+      "language": "java",
+      "attempt": 2,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 5,
+      "tool_calls": 6,
+      "duration": 14.469,
+      "usage": {
+        "input_tokens": 13885,
+        "output_tokens": 769
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E1"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "bf1982337999e1bb71736bb59aaed6c1910ae14d2533b7ec659cc601f1c91d67"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "56e98b32d899203ce725e584bc7773a64a2528059bba707e2b82e487cec4e62f"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "9efd3164d0a2e4c0fd7cb394fb34d68729a658b5c8dedacdf126c8547f5e31c8"
+        }
+      ],
+      "run_id": "81d604bbee3d4d9c9ae3341f81aa9a84",
+      "fixture_commit": "c200e2cab80cf9df6f36655b944269b0feef62d3",
+      "artifacts": "EJ3-2-1791807674927285900"
+    },
+    {
+      "case": "EJ3",
+      "kind": "edit",
+      "language": "java",
+      "attempt": 3,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 5,
+      "tool_calls": 6,
+      "duration": 14.36,
+      "usage": {
+        "input_tokens": 13884,
+        "output_tokens": 795
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E1"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "25e519a4d54431f82f3a5e1b30caabcd65d28083c923a9c78176ac7127df9b95"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "e60d74ff84d89218c89cdb7b8c523844b3999cd123c2b903577db188e4491391"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "a8f3c13c9b002b2a9295cee82013e0a674c0cdc1d03290afcf4f79afb7274ed8"
+        }
+      ],
+      "run_id": "5ce3891194c74c7cb4c6973ec0b870f7",
+      "fixture_commit": "c200e2cab80cf9df6f36655b944269b0feef62d3",
+      "artifacts": "EJ3-3-1791807690267769500"
+    },
+    {
+      "case": "EP1",
+      "kind": "edit",
+      "language": "python",
+      "attempt": 1,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 5,
+      "tool_calls": 6,
+      "duration": 7.172,
+      "usage": {
+        "input_tokens": 12438,
+        "output_tokens": 614
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E1"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "55a7aca607933b0251f86da0ea0a95aa2cff607655fa297a31062882131d6045"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "47a3a9b6358349043d5e136c9670b1cab4d26a02403b733a16a4650ba02b95a1"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "f700473dd480a6c04498eea7add53a01f88a7c133eb9abfbbc0ea86abb2d1534"
+        }
+      ],
+      "run_id": "4b13c9d6d0be4e99b751ccd0d983d680",
+      "fixture_commit": "b0b8aa2a247732567c29a74f14cca8e6fb4ba59e",
+      "artifacts": "EP1-1-1791807705467605600"
+    },
+    {
+      "case": "EP1",
+      "kind": "edit",
+      "language": "python",
+      "attempt": 2,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 5,
+      "tool_calls": 6,
+      "duration": 7.469,
+      "usage": {
+        "input_tokens": 12346,
+        "output_tokens": 603
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E1"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "3367fc3e34296309697d30902cea3cc2da07631e8ae3219d743ea9a88d11e882"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "09756ddb580b51d7e044b1cafeada8bde0ab8f3d56ea911d851238b42fd41931"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "dc086968a258f21d951f9af8770eb01c67843de610755febdab716da8a33296d"
+        }
+      ],
+      "run_id": "ffcda52017e24824b353a9b8ce015e30",
+      "fixture_commit": "b0b8aa2a247732567c29a74f14cca8e6fb4ba59e",
+      "artifacts": "EP1-2-1791807713402855400"
+    },
+    {
+      "case": "EP1",
+      "kind": "edit",
+      "language": "python",
+      "attempt": 3,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 6,
+      "tool_calls": 7,
+      "duration": 8.281,
+      "usage": {
+        "input_tokens": 16224,
+        "output_tokens": 703
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E1"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "477db227e5c4f4781bcc92bece554a9892ce1e5583713a7709ae2a3bb439d285"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "b9589a577cbdcf0641b01eda200a2e6eddf2b5b4e96ae2d937c7a8bb0a290ec0"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "fa856a0367f1ba469448588cbe7d8b8a57efc14a48604d5cd50c70d1c44d45c4"
+        }
+      ],
+      "run_id": "137020ba5d9344b8b69680efffd4d4c9",
+      "fixture_commit": "b0b8aa2a247732567c29a74f14cca8e6fb4ba59e",
+      "artifacts": "EP1-3-1791807721634988500"
+    },
+    {
+      "case": "EP2",
+      "kind": "edit",
+      "language": "python",
+      "attempt": 1,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 5,
+      "tool_calls": 6,
+      "duration": 7.531,
+      "usage": {
+        "input_tokens": 12428,
+        "output_tokens": 639
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E1"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "1af8b68f40a9628f98a95bad57434162f15d3682eea7e9b931e58315d539e341"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "4a0bcf6ecd6d3a0c39d92bc445360e8e2d9a793bd9caa76a764bc3a236b2a327"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "36d8a5f833e37b1f905ef0aea37051277ff92151949ccf14b47b49ce45b7478a"
+        }
+      ],
+      "run_id": "daca5c3bcadb4c82939e6f62515695c2",
+      "fixture_commit": "1183bbf33f4ac70c1b0c6beab890f029b7855c3a",
+      "artifacts": "EP2-1-1791807730695110600"
+    },
+    {
+      "case": "EP2",
+      "kind": "edit",
+      "language": "python",
+      "attempt": 2,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 5,
+      "tool_calls": 7,
+      "duration": 7.797,
+      "usage": {
+        "input_tokens": 12775,
+        "output_tokens": 759
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E1"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "df8755c94023b61f1e1c2d12a3bee8abf2c595f7d6eac26687cf62cb573d58a6"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "066daa1e07eec15723e1c73075731b282efc6a26bd9e8bbde6c75a3ca686fa9f"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "13864c142afffa185a45df29ef3d70e9de6dabd9bc639eaa648f60cea6426aec"
+        }
+      ],
+      "run_id": "08673cb446624b7b8e6dc942c43899a7",
+      "fixture_commit": "1183bbf33f4ac70c1b0c6beab890f029b7855c3a",
+      "artifacts": "EP2-2-1791807739047837500"
+    },
+    {
+      "case": "EP2",
+      "kind": "edit",
+      "language": "python",
+      "attempt": 3,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 5,
+      "tool_calls": 6,
+      "duration": 7.063,
+      "usage": {
+        "input_tokens": 12530,
+        "output_tokens": 666
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E1"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "553766f9dd1d5a100ac384c0b3d051af6dfc3fcca7baaceeb99af231bc15d551"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "b3bbe4b8eea4d1f34e595c011678d257b65ee509f998a76d734738610e02608d"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "0b1844c56107fdbe1b101ccb2591b21e3dec4b5bdc44123ac5d4d8e3f59bee59"
+        }
+      ],
+      "run_id": "ca7f1a6ab5bb4fd0bdcf060711b6de75",
+      "fixture_commit": "1183bbf33f4ac70c1b0c6beab890f029b7855c3a",
+      "artifacts": "EP2-3-1791807747603175700"
+    },
+    {
+      "case": "EP3",
+      "kind": "edit",
+      "language": "python",
+      "attempt": 1,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 5,
+      "tool_calls": 6,
+      "duration": 7.266,
+      "usage": {
+        "input_tokens": 12871,
+        "output_tokens": 685
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E1"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "20fcafc3396636d765a2fc1ea0b8e8c206a4060f1dcfb087642633befc9d1220"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "c60d5068ec42cc0899ea6f8a9ae2aeb7af9cbf2bc19fce2b03d76a94a92be566"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "cfdffc2b6c6e0f390125c47be39b9524c2748d83c7cef8ab5c2d422fa9691481"
+        }
+      ],
+      "run_id": "abca79d926dc4c839e764e2ed5319c4f",
+      "fixture_commit": "bc931912fa7782fdab81d23720b1dc1707976767",
+      "artifacts": "EP3-1-1791807755367749700"
+    },
+    {
+      "case": "EP3",
+      "kind": "edit",
+      "language": "python",
+      "attempt": 2,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 5,
+      "tool_calls": 6,
+      "duration": 8.422,
+      "usage": {
+        "input_tokens": 13040,
+        "output_tokens": 823
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E1"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "548beb89122d13ca455ecf2c39981e7823f8b43adaae208cdbe41917ffc2b3f9"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "5e0cc989c11ba89806b86b357935629ca9a6f76863665392f0eca076d9dca087"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "75778a4223dac6a41d069b2ea8ae014e0814463ad023e966dbcce88e4eddc0e2"
+        }
+      ],
+      "run_id": "ed624ccab5904f4aa53f3e7815ae14b3",
+      "fixture_commit": "bc931912fa7782fdab81d23720b1dc1707976767",
+      "artifacts": "EP3-2-1791807763465902500"
+    },
+    {
+      "case": "EP3",
+      "kind": "edit",
+      "language": "python",
+      "attempt": 3,
+      "passed": true,
+      "status": "completed",
+      "stop_reason": "ANSWER",
+      "verification": "passed",
+      "model_turns": 5,
+      "tool_calls": 6,
+      "duration": 8.547,
+      "usage": {
+        "input_tokens": 12935,
+        "output_tokens": 742
+      },
+      "usage_complete": true,
+      "warnings": [
+        "Stale evidence citation: E1"
+      ],
+      "approval_decisions": [
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "3ac1f6c6f60e8a3368aa0e2383d62fb520b757c3e802bc14ff004798ee32e49f"
+        },
+        {
+          "kind": "file_write",
+          "granted": true,
+          "fingerprint": "95fa477b3a6bd3ccb255b49a759735a21b610aadc52524c04bbd12d39a4e8ba1"
+        },
+        {
+          "kind": "test_run",
+          "granted": true,
+          "fingerprint": "31e7c6b3bcc4948fe94948a4ed029a217283fcb4aac21ba0c65919e20a78d3b9"
+        }
+      ],
+      "run_id": "a3ce17bdc2224d72a4afa30f986d6133",
+      "fixture_commit": "bc931912fa7782fdab81d23720b1dc1707976767",
+      "artifacts": "EP3-3-1791807772639440900"
+    }
+  ]
+}

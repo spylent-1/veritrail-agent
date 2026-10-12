@@ -48,3 +48,11 @@ def test_help_has_doctor_command():
     result = CliRunner().invoke(app, ["--help"])
     assert result.exit_code == 0
     assert "doctor" in result.output
+
+
+def test_run_config_error_does_not_echo_secret_config_value(tmp_path, monkeypatch):
+    monkeypatch.setenv("REPOPILOT_HOME", str(tmp_path))
+    (tmp_path / "config.toml").write_text('unknown_api_key = "private-config-value"')
+    result = CliRunner().invoke(app, ["run", "hello", "--workspace", str(tmp_path)])
+    assert result.exit_code == 2 and "CONFIG_ERROR" in result.output
+    assert "private-config-value" not in result.output
