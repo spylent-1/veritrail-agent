@@ -1,5 +1,7 @@
 import asyncio
 import json
+import os
+import subprocess
 import sys
 
 import pytest
@@ -107,3 +109,31 @@ async def test_extra_model_command_arguments_rejected(tmp_path):
         )
     )
     assert result.error_code == "INVALID_ARGUMENTS"
+
+
+async def test_timeout_terminates_normal_descendant(tmp_path):
+    code = (
+        "import subprocess,time,pathlib; "
+        f"p=subprocess.Popen([{sys.executable!r},'-c','import time; time.sleep(30)']); "
+        "pathlib.Path('childpid').write_text(str(p.pid)); time.sleep(30)"
+    )
+    with pytest.raises(TimeoutError):
+        await run_process([sys.executable, "-c", code], tmp_path, 1.5)
+    pid = int((tmp_path / "childpid").read_text())
+    if os.name == "nt":
+        result = subprocess.run(
+            ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV", "/NH"],
+            capture_output=True,
+            check=True,
+        )
+        assert f'"{pid}"'.encode() not in result.stdout
+    else:
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            pass
+        else:
+            # A killed, not-yet-reaped orphan is not executing.
+            from pathlib import Path
+
+            assert Path(f"/proc/{pid}/stat").read_text().split()[2] == "Z"

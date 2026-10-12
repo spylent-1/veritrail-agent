@@ -1,5 +1,6 @@
 """Host-configured test profiles. A successful process exit alone never proves a passing test."""
 
+import os
 import uuid
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -12,7 +13,33 @@ from repopilot.models import JsonObject
 from repopilot.process import run_process
 from repopilot.safety import PreparedAction
 from repopilot.tools import ToolDefinition, ToolOutput, ToolRegistry
-from repopilot.workspace import Workspace
+from repopilot.workspace import Workspace, is_link
+
+
+def maven_reports(cwd: Path) -> dict[Path, tuple[int, int]]:
+    reports: dict[Path, tuple[int, int]] = {}
+    for path in cwd.glob("**/target/surefire-reports/TEST-*.xml"):
+        if len(reports) >= 100:
+            raise RepoPilotError("REPORT_LIMIT", "Too many Maven test reports.")
+        if path.resolve().is_relative_to(cwd.resolve()) and not any(
+            is_link(parent) for parent in (path, *path.parents) if parent.is_relative_to(cwd)
+        ):
+            info = path.stat()
+            reports[path] = (info.st_mtime_ns, info.st_size)
+    return reports
+
+
+def maven_command(executable: Path, args: list[str], cwd: Path) -> list[str]:
+    values = [str(executable), str(cwd), *args]
+    if os.name == "nt":
+        values += [os.environ.get("JAVA_HOME", "")]
+        if any(any(c in value for c in '&|<>^%!"\r\n') for value in values):
+            raise RepoPilotError(
+                "UNSAFE_COMMAND", "Windows batch paths/arguments contain shell syntax."
+            )
+        if executable.suffix.casefold() != ".cmd":
+            raise RepoPilotError("INVALID_EXECUTABLE", "Windows Maven must use installed mvn.cmd.")
+    return [str(executable), "-B", "-ntp", "test", *args]
 
 
 class TestArgs(StrictModel):
@@ -62,8 +89,6 @@ class TestRunner:
             raise RepoPilotError(
                 "INVALID_EXECUTABLE", "Configure an absolute installed executable."
             )
-        if profile.kind != "pytest":
-            raise RepoPilotError("UNSUPPORTED_RUNNER", "Maven support is not installed yet.")
         cwd = self.workspace.resolve(profile.cwd, allow_root=True)
         if not cwd.is_dir():
             raise RepoPilotError("INVALID_CWD", "Test working directory must exist.")
@@ -71,7 +96,11 @@ class TestRunner:
         self.artifact_dir.mkdir(parents=True, exist_ok=True)
         xml = self.artifact_dir / f"{key}.xml"
         log = self.artifact_dir / f"{key}.log"
-        argv = [str(executable), "-m", "pytest", *profile.args, f"--junitxml={xml}"]
+        argv = (
+            [str(executable), "-m", "pytest", *profile.args, f"--junitxml={xml}"]
+            if profile.kind == "pytest"
+            else maven_command(executable, profile.args, cwd)
+        )
         intent = {
             "kind": "test_run",
             "profile": name,
@@ -81,11 +110,22 @@ class TestRunner:
         }
 
         async def commit() -> ToolOutput:
+            before = maven_reports(cwd) if profile.kind == "maven" else {}
             process = await run_process(argv, cwd, profile.timeout)
             log.write_text(process.output, encoding="utf-8")
+            files = (
+                ([xml] if xml.is_file() else [])
+                if profile.kind == "pytest"
+                else [
+                    path for path, stamp in maven_reports(cwd).items() if before.get(path) != stamp
+                ]
+            )
+            if profile.kind == "maven":
+                for i, path in enumerate(files):
+                    (self.artifact_dir / f"{key}-junit-{i}.xml").write_bytes(path.read_bytes())
             counts = (
-                junit_counts([xml])
-                if xml.is_file()
+                junit_counts(files)
+                if files
                 else {
                     "tests": 0,
                     "failed": 0,
