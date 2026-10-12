@@ -1,0 +1,14 @@
+[
+  {"id":"LJ1","kind":"locate","language":"java","file":"src/main/java/demo/CouponService.java","symbol":"hasClaim","prompt":"定位优惠券重复领取的校验，说明调用链及证据边界。给出方法名、源码路径、行号及证据编号。"},
+  {"id":"LJ2","kind":"locate","language":"java","file":"src/main/java/demo/ShopService.java","symbol":"discountedPrice","prompt":"找到计算优惠后价格并限制最低价格的 Java 方法，说明实现。给出方法名、源码路径、行号及证据编号。"},
+  {"id":"LJ3","kind":"locate","language":"java","file":"src/main/java/demo/ShopService.java","symbol":"remainingStock","prompt":"找到扣减库存并拒绝非法数量的 Java 方法，说明边界。给出方法名、源码路径、行号及证据编号。"},
+  {"id":"LJ4","kind":"locate","language":"java","file":"src/main/java/demo/CouponController.java","symbol":"service.claim","prompt":"找到将领取请求交给业务层的入口代码，追踪到下一层。给出方法名、源码路径、行号及证据编号。"},
+  {"id":"LP1","kind":"locate","language":"python","file":"shop.py","symbol":"discounted_price","prompt":"定位拒绝负金额并计算优惠价格的 Python 方法。给出函数名、源码路径、行号及证据编号。"},
+  {"id":"LP2","kind":"locate","language":"python","file":"shop.py","symbol":"remaining_stock","prompt":"定位扣减库存及参数校验的 Python 方法，说明数量等于库存时的行为。给出函数名、源码路径、行号及证据编号。"},
+  {"id":"EJ1","kind":"edit","language":"java","file":"src/main/java/demo/ShopService.java","good":"price - discount","bad":"price + discount","prompt":"优惠价格计算有 bug：100 元减 30 元应为 70 元，最低为 0。先运行 unit 测试，局部修复，再运行 unit。不得修改测试和 pom.xml。"},
+  {"id":"EJ2","kind":"edit","language":"java","file":"src/main/java/demo/ShopService.java","good":"userId > 0","bad":"userId >= 0","prompt":"领取资格校验错误地允许 userId=0，合法用户必须为正整数且库存大于 0。先运行 unit 测试，局部修复，再运行 unit。不得修改测试和 pom.xml。"},
+  {"id":"EJ3","kind":"edit","language":"java","file":"src/main/java/demo/ShopService.java","good":"quantity > stock","bad":"quantity >= stock","prompt":"扣减数量等于库存时错误地拒绝请求，应允许并返回 0；超出库存或负数量仍须拒绝。先运行 unit 测试，局部修复，再运行 unit。不得修改测试和 pom.xml。"},
+  {"id":"EP1","kind":"edit","language":"python","file":"shop.py","good":"price - discount","bad":"price + discount","prompt":"优惠价格计算有 bug：100 元减 30 元应为 70 元，最低为 0。先运行 unit 测试，局部修复，再运行 unit。不得修改已有测试。"},
+  {"id":"EP2","kind":"edit","language":"python","file":"shop.py","good":"user_id > 0","bad":"user_id >= 0","prompt":"领取资格校验错误地允许 user_id=0，合法用户必须为正整数且库存大于 0。先运行 unit 测试，局部修复，再运行 unit。不得修改已有测试。"},
+  {"id":"EP3","kind":"edit","language":"python","file":"shop.py","good":"quantity > stock","bad":"quantity >= stock","prompt":"扣减数量等于库存时错误地拒绝请求，应允许并返回 0；超出库存或负数量仍须拒绝。先运行 unit 测试，局部修复，再运行 unit。不得修改已有测试。"}
+]

@@ -20,6 +20,7 @@ class ShopServiceTest {
 
     @Test void stockIsSubtractedAndValidated() {
         assertEquals(7, service.remainingStock(10, 3));
+        assertEquals(0, service.remainingStock(10, 10));
         assertThrows(IllegalArgumentException.class, () -> service.remainingStock(10, 11));
     }
 }

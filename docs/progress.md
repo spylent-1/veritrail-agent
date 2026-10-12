@@ -18,7 +18,8 @@
 | T12 上下文与运行预算 | 本地验收通过 | 上下文含工具 Schema 容量、完整轮次裁剪、历史不重写；审批等待不计预算、取消闭合消息、失败请求 usage 不冒充完整 |
 | T13 stdio 生命周期 | 本地验收通过 | mcp 2.3.0；独立真实 Server 启动/发现/调用/关闭；异常启动结构化失败；legacy framing 无隐式工具重试 |
 | T14 MCP 统一工具执行 | 本地与真实调用通过 | 真实模型 2 轮、1 次 MCP 工具；审批/allow-list/Schema/Trace、超时/断连；外部内容不伪装文件证据 |
-| T15–T16 评测和交付 | 待实现 | |
+| T15 评测与独立评分 | 本地验收通过 | 12 固定任务、每任务 3 次；独立 Python/Java 评分器分别拒绝 6 个故障版本、接受修复版本；固定起始提交 |
+| T16 真实评测与交付 | 待实施 | |
 
 不包含 RAG、长期 Memory、Skill、并行 Agent、自由 Shell 和生产沙箱。
 
@@ -27,3 +28,7 @@ T05 实测说明：deepseek-flash，thinking disabled；正确定位 Controller 
 仓库评测或生产代码质量结论。真实测试执行尚未引入，因此 verification=not_run。
 
 Provider SDK 契约参考：https://developers.openai.com/api/reference/python/resources/chat/subresources/completions/methods/create
+
+T14 首次真实 MCP 回答引用了不存在的 E1，运行报告准确标为 Unknown evidence citation。
+该原始结果保存在 docs/validation/mcp-live.json。系统提示已明确区分外部来源和文件证据，
+但不能据此宣称模型不再产生错误引用；文件定位由评测评分器严格检查实际引用与当前哈希。
