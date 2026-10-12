@@ -12,13 +12,12 @@ import typer
 from rich.console import Console
 
 from repopilot import __version__
-from repopilot.agent import AgentRunner
+from repopilot.application import run_task
 from repopilot.config import api_key, load_settings, state_home
 from repopilot.deepseek import DeepSeekProvider
 from repopilot.errors import RepoPilotError
 from repopilot.models import JsonObject, RunReport
-from repopilot.tools import ReadTools, ToolExecutor, ToolRegistry
-from repopilot.workspace import Workspace
+from repopilot.store import SessionStore
 
 app = typer.Typer(no_args_is_help=True, help="RepoPilot: inspect, edit and verify trusted code.")
 console = Console(markup=False, highlight=False)
@@ -82,14 +81,9 @@ def run(
         key = api_key()
         if not key:
             raise RepoPilotError("KEY_MISSING", "Set DEEPSEEK_API_KEY in the host environment.")
-        root = Workspace(workspace, excluded_roots=(state_home(),))
-        registry = ToolRegistry()
-        ReadTools(root).register(registry)
         provider = DeepSeekProvider(settings.model, key)
         try:
-            return await AgentRunner(
-                provider, ToolExecutor(registry, settings.limits), settings.limits, show_event
-            ).run(task)
+            return await run_task(task, workspace, state_home(), settings, provider, show_event)
         finally:
             await provider.close()
 
@@ -107,6 +101,35 @@ def run(
             console.print(warning)
     if report.status != "completed":
         raise typer.Exit(1)
+
+
+@app.command()
+def sessions() -> None:
+    """List locally saved sessions."""
+    store = SessionStore(state_home())
+    try:
+        for session in store.sessions():
+            console.print(f"{session['id']}  {session['workspace']}  {session['title']}")
+    finally:
+        store.close()
+
+
+@app.command()
+def trace(run_id: str, jsonl: bool = typer.Option(False, "--jsonl")) -> None:
+    """Inspect a saved run; --jsonl exports ordered events to stdout."""
+    store = SessionStore(state_home())
+    try:
+        if jsonl:
+            for event in store.events(run_id):
+                typer.echo(json.dumps(event, ensure_ascii=False))
+        else:
+            report = store.report(run_id)
+            console.print(report.model_dump_json(indent=2) if report else "Run is incomplete.")
+    except RepoPilotError as exc:
+        console.print(f"{exc.code}: {exc}")
+        raise typer.Exit(2) from None
+    finally:
+        store.close()
 
 
 if __name__ == "__main__":
