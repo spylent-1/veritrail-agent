@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field, ValidationError
 from repopilot.config import Limits, StrictModel
 from repopilot.errors import RepoPilotError
 from repopilot.models import EvidenceRef, JsonObject, ToolCall, ToolResult
+from repopilot.safety import ApprovalHandler, DenyApproval, PolicyEngine, PreparedAction
 from repopilot.sanitize import clean, clean_data
 from repopilot.workspace import Workspace
 
@@ -31,6 +32,7 @@ class ToolDefinition:
     args_type: type[BaseModel]
     handler: Callable[[JsonObject], Awaitable[ToolOutput]]
     risk: Literal["read", "write", "execute", "external"] = "read"
+    prepare: Callable[[JsonObject], Awaitable[PreparedAction]] | None = None
 
     def wire(self) -> JsonObject:
         return {
@@ -62,20 +64,71 @@ class ToolRegistry:
 
 
 class ToolExecutor:
-    def __init__(self, registry: ToolRegistry, limits: Limits) -> None:
+    def __init__(
+        self,
+        registry: ToolRegistry,
+        limits: Limits,
+        *,
+        policy: PolicyEngine | None = None,
+        approval: ApprovalHandler | None = None,
+        on_event: Callable[[str, JsonObject], None] | None = None,
+    ) -> None:
         self.registry = registry
         self.limits = limits
+        self.policy = policy or PolicyEngine()
+        self.approval = approval or DenyApproval()
+        self.on_event = on_event or (lambda kind, data: None)
+        self.approval_seconds = 0.0
 
     async def execute(self, call: ToolCall) -> ToolResult:
         try:
             tool = self.registry.get(call.name)
-            if tool.risk != "read":
-                raise RepoPilotError("POLICY_DENIED", "Side effects are not enabled.")
+            decision = self.policy.evaluate(tool.risk)
+            if decision == "deny":
+                return ToolResult(
+                    call_id=call.id,
+                    status="denied",
+                    error_code="POLICY_DENIED",
+                    message="Host policy forbids this operation.",
+                )
             if len(call.arguments.encode()) > self.limits.context_bytes:
                 raise RepoPilotError("INVALID_ARGUMENTS", "Tool arguments exceed the limit.")
             args = tool.args_type.model_validate_json(call.arguments, strict=True).model_dump()
-            async with asyncio.timeout(self.limits.tool_timeout):
-                output = await tool.handler(args)
+            if decision == "allow":
+                async with asyncio.timeout(self.limits.tool_timeout):
+                    output = await tool.handler(args)
+            else:
+                if not tool.prepare:
+                    raise RepoPilotError("UNSAFE_TOOL", "Side effects require a prepared action.")
+                async with asyncio.timeout(self.limits.tool_timeout):
+                    action = await tool.prepare(args)
+                if action.risk != tool.risk:
+                    raise RepoPilotError("UNSAFE_TOOL", "Prepared risk does not match tool policy.")
+                fingerprint = action.fingerprint()
+                started = time.monotonic()
+                try:
+                    granted = await self.approval.confirm(action)
+                finally:
+                    self.approval_seconds += time.monotonic() - started
+                self.on_event(
+                    "approval", {"call_id": call.id, "granted": granted, "fingerprint": fingerprint}
+                )
+                if not granted:
+                    return ToolResult(
+                        call_id=call.id,
+                        status="denied",
+                        error_code="USER_DENIED",
+                        message="User declined the concrete operation.",
+                    )
+                if action.fingerprint() != fingerprint:
+                    raise RepoPilotError("APPROVAL_CHANGED", "Operation changed after approval.")
+                # A failing journal write prevents commit. Nothing is executed before this event.
+                self.on_event(
+                    "tool_intent",
+                    {"call_id": call.id, "fingerprint": fingerprint, "intent": action.intent},
+                )
+                async with asyncio.timeout(action.timeout):
+                    output = await action.commit()
             result = ToolResult(
                 call_id=call.id,
                 data=output.data,

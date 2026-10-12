@@ -109,6 +109,11 @@ class SessionStore:
                     "UPDATE tool_executions SET status=?,result=? WHERE run_id=? AND call_id=?",
                     (data["status"], encode(data), run_id, data["call_id"]),
                 )
+            elif kind == "tool_intent":
+                self.db.execute(
+                    "UPDATE tool_executions SET intent=? WHERE run_id=? AND call_id=?",
+                    (encode(data["intent"]), run_id, data["call_id"]),
+                )
             elif kind == "run_finished":
                 self.db.execute(
                     "UPDATE runs SET status=?,report=? WHERE id=?",
