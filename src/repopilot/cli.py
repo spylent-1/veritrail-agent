@@ -124,6 +124,115 @@ def run(
         raise typer.Exit(1)
 
 
+def interactive_terminal() -> bool:
+    return sys.stdin.isatty()
+
+
+@app.command()
+def chat(
+    workspace: Annotated[Path | None, typer.Option("--workspace")] = None,
+    mode: str | None = typer.Option(None, "--mode"),
+    session_id: str | None = typer.Option(None, "--session"),
+    mcp: Annotated[list[str] | None, typer.Option("--mcp")] = None,
+) -> None:
+    """Chat continuously; each task shares a saved session and normal approvals."""
+    try:
+        if not interactive_terminal():
+            raise RepoPilotError("INTERACTIVE_REQUIRED", "Use chat in a terminal, or use run.")
+        home = state_home()
+        root = workspace or Path(".")
+        selected_mode = mode or "read"
+        if session_id:
+            store = SessionStore(home)
+            try:
+                session = store.session(session_id)
+                runs = store.runs(session_id)
+                saved_root = Path(session["workspace"])
+                if workspace is not None and workspace.resolve() != saved_root:
+                    raise RepoPilotError(
+                        "WORKSPACE_CHANGED", "Session belongs to another workspace."
+                    )
+                root = saved_root
+                selected_mode = mode or (runs[-1]["mode"] if runs else "read")
+            finally:
+                store.close()
+        if selected_mode not in ("read", "edit"):
+            raise RepoPilotError("INVALID_MODE", "Choose --mode read or edit.")
+        settings = checked_settings()
+        key = api_key()
+        if not key:
+            raise RepoPilotError("KEY_MISSING", "Set DEEPSEEK_API_KEY in the host environment.")
+        console.print(f"工作区: {root.resolve()}；模式: {selected_mode}")
+        console.print("直接输入任务。/help 查看命令，/new 新会话，/exit 退出。")
+        if session_id:
+            console.print(f"继续会话: {session_id}；旧审批已失效，待核对操作将在执行前检查。")
+
+        def show_event(kind: str, data: JsonObject) -> None:
+            if kind == "model_started":
+                console.print("正在思考…")
+            elif kind == "tool_started":
+                console.print(f"调用工具: {data.get('name', '')}")
+
+        async def execute() -> None:
+            provider = DeepSeekProvider(settings.model, key)
+            active_session = session_id
+            try:
+                while True:
+                    try:
+                        task = typer.prompt(
+                            "你", prompt_suffix="> ", default="", show_default=False
+                        ).strip()
+                    except (EOFError, typer.Abort):
+                        console.print("对话已结束。")
+                        break
+                    if not task:
+                        continue
+                    if task == "/exit":
+                        console.print("对话已结束。")
+                        break
+                    if task == "/help":
+                        console.print("/new 开始新会话；/exit 退出。其他文字作为任务提交。")
+                        continue
+                    if task == "/new":
+                        active_session = None
+                        console.print("已开始新会话，上下文将在下一条任务时建立。")
+                        continue
+                    if task.startswith("/"):
+                        console.print("未知命令。输入 /help 查看命令。")
+                        continue
+                    report = await run_task(
+                        task,
+                        root,
+                        home,
+                        settings,
+                        provider,
+                        show_event,
+                        mode=selected_mode,
+                        session_id=active_session,
+                        approval=TerminalApproval(console),
+                        mcp_names=mcp,
+                    )
+                    active_session = report.session_id
+                    console.print(report.answer)
+                    console.print(f"Run: {report.status}; verification: {report.verification}")
+                    console.print(f"会话: {active_session}；运行: {report.run_id}")
+                    for warning in report.warnings:
+                        console.print(warning)
+                    if report.status == "cancelled":
+                        console.print("任务已取消，对话已结束；可用 chat --session 继续。")
+                        break
+            finally:
+                await provider.close()
+
+        asyncio.run(execute())
+    except RepoPilotError as exc:
+        console.print(f"{exc.code}: {exc}")
+        raise typer.Exit(2) from None
+    except KeyboardInterrupt:
+        console.print("对话已中断；已保存的会话可用 chat --session 继续。")
+        raise typer.Exit(130) from None
+
+
 @app.command()
 def sessions() -> None:
     """List locally saved sessions."""

@@ -32,3 +32,16 @@ Provider SDK 契约参考：https://developers.openai.com/api/reference/python/r
 T14 首次真实 MCP 回答引用了不存在的 E1，运行报告准确标为 Unknown evidence citation。
 该原始结果保存在 docs/validation/mcp-live.json。系统提示已明确区分外部来源和文件证据，
 但不能据此宣称模型不再产生错误引用；文件定位由评测评分器严格检查实际引用与当前哈希。
+
+## 交付后的改进
+
+2026-10-13：C01 连续对话入口，本地验收通过。新增 `repopilot chat`，逐条任务共用保存的会话，
+支持 `/help`、`/new`、`/exit` 和 `chat --session`。终端输入仅在 CLI 内处理，继续调用原有
+run_task、ToolExecutor、审批和 SQLite 路径；不复用旧审批或文件读取授权，不自动重放失败任务。
+MCP 仍需显式选择，启动与调用继续逐次审批。
+
+新增 12 项 ScriptedFake CLI 行为测试，覆盖历史与工具消息配对、新会话、退出/EOF、会话继续、
+工作区冲突、拒绝编辑、失败后追问、取消与客户端清理、非交互拒绝及缺密钥。
+全项目 125 tests 通过（39.45 秒），Ruff 检查/格式检查、mypy、git diff --check 通过；
+真实已安装 CLI 的 chat 帮助可用。本次未调用真实模型，也未运行远端 CI；T16 的模型评测数据
+保持原来源版本含义，不将其记为此次交互入口的真实模型验证。
