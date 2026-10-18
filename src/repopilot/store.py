@@ -30,7 +30,7 @@ class SessionStore:
         version = self.db.execute("PRAGMA user_version").fetchone()[0]
         if version > 1:
             self.db.close()
-            raise RepoPilotError("SCHEMA_VERSION", "Database belongs to a newer RepoPilot version.")
+            raise RepoPilotError("SCHEMA_VERSION", "Database belongs to a newer VeriTrail version.")
         if version == 0:
             self.db.executescript("""
                 BEGIN;

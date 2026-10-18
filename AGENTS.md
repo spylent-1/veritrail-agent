@@ -1,4 +1,4 @@
-# RepoPilot development rules
+# VeriTrail development rules
 
 Read README.md and docs/progress.md before changing behavior. Keep changes in a small,
 reviewable task; finish its acceptance checks before starting another capability.

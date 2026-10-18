@@ -3,10 +3,13 @@ requires = ["hatchling>=1.27,<2"]
 build-backend = "hatchling.build"
 
 [project]
-name = "repopilot"
+name = "veritrail-agent"
 version = "0.1.0"
-description = "An auditable, approval-controlled coding agent for local repositories"
+description = "An auditable coding agent CLI with approval-gated edits and recoverable workflows"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "spylent-1" }]
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "typer>=0.16,<1",
@@ -18,7 +21,13 @@ dependencies = [
     "jsonschema>=4,<5",
 ]
 
+[project.urls]
+Homepage = "https://github.com/spylent-1/veritrail-agent"
+Repository = "https://github.com/spylent-1/veritrail-agent"
+Issues = "https://github.com/spylent-1/veritrail-agent/issues"
+
 [project.scripts]
+veritrail = "repopilot.cli:app"
 repopilot = "repopilot.cli:app"
 
 [dependency-groups]
@@ -43,6 +52,8 @@ include = [
     ".github",
     "AGENTS.md",
     "README.md",
+    "README.zh-CN.md",
+    "LICENSE",
     "pyproject.toml",
     "uv.lock",
     ".python-version",

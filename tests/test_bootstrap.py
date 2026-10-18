@@ -48,6 +48,7 @@ def test_help_has_doctor_command():
     result = CliRunner().invoke(app, ["--help"])
     assert result.exit_code == 0
     assert "doctor" in result.output
+    assert "VeriTrail" in result.output
 
 
 def test_run_config_error_does_not_echo_secret_config_value(tmp_path, monkeypatch):

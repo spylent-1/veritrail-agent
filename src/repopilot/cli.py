@@ -20,7 +20,7 @@ from repopilot.models import JsonObject, RunReport
 from repopilot.store import SessionStore
 from repopilot.ui import TerminalApproval
 
-app = typer.Typer(no_args_is_help=True, help="RepoPilot: inspect, edit and verify trusted code.")
+app = typer.Typer(no_args_is_help=True, help="VeriTrail: inspect, edit and verify trusted code.")
 console = Console(markup=False, highlight=False)
 
 

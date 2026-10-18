@@ -13,7 +13,7 @@ def main() -> None:
     parser.add_argument("--root", type=Path, required=True)
     args = parser.parse_args()
     workspace = Workspace(args.root)
-    server = MCPServer("RepoPilot project conventions")
+    server = MCPServer("VeriTrail project conventions")
 
     @server.tool()
     def get_project_conventions(topic: str = "general") -> str:
