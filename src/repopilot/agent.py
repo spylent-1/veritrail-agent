@@ -167,12 +167,9 @@ class AgentRunner:
                         report.tool_calls += 1
                         report.evidence.extend(result.evidence)
                         changed = result.data.get("changed_file")
-                        if (
-                            result.status == "ok"
-                            and changed
-                            and changed not in report.changed_files
-                        ):
-                            report.changed_files.append(changed)
+                        if result.status == "ok" and changed:
+                            if changed not in report.changed_files:
+                                report.changed_files.append(changed)
                             report.verification = "not_run"
                         verification = result.data.get("verification")
                         if result.status == "ok" and verification in (

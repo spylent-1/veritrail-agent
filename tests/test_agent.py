@@ -1,6 +1,10 @@
+from unittest.mock import AsyncMock
+
+import pytest
+
 from repopilot.agent import AgentRunner
 from repopilot.config import Limits
-from repopilot.models import ModelTurn, ToolCall, validate_messages
+from repopilot.models import ModelTurn, ToolCall, ToolResult, validate_messages
 from repopilot.providers import ScriptedFake
 from repopilot.tools import ReadTools, ToolExecutor, ToolRegistry
 from repopilot.workspace import Workspace
@@ -65,3 +69,43 @@ async def test_truncated_tool_call_not_executed(tmp_path):
     agent, _ = runner(tmp_path, [ModelTurn(tool_calls=[call()], finish_reason="length")])
     report = await agent.run("read")
     assert report.stop_reason == "MODEL_INCOMPLETE" and report.tool_calls == 0
+
+
+@pytest.mark.parametrize(
+    "last_edit,retest,expected",
+    [
+        (ToolResult(call_id="e2", data={"changed_file": "a.py"}), False, "not_run"),
+        (ToolResult(call_id="e2", data={"changed_file": "a.py"}), True, "passed"),
+        (ToolResult(call_id="e2", status="denied"), False, "passed"),
+        (ToolResult(call_id="e2", status="error", error_code="FILE_CONFLICT"), False, "passed"),
+        (ToolResult(call_id="e2", status="error", error_code="NO_CHANGE"), False, "passed"),
+    ],
+)
+async def test_verification_tracks_every_successful_write(
+    tmp_path, monkeypatch, last_edit, retest, expected
+):
+    calls = [
+        ToolCall(id="e1", name="edit_file", arguments="{}"),
+        ToolCall(id="t1", name="run_tests", arguments="{}"),
+        ToolCall(id="e2", name="edit_file", arguments="{}"),
+    ]
+    results = [
+        ToolResult(call_id="e1", data={"changed_file": "a.py"}),
+        ToolResult(call_id="t1", data={"verification": "passed"}),
+        last_edit,
+    ]
+    if retest:
+        calls.append(ToolCall(id="t2", name="run_tests", arguments="{}"))
+        results.append(ToolResult(call_id="t2", data={"verification": "passed"}))
+    agent, _ = runner(
+        tmp_path, [*(ModelTurn(tool_calls=[c]) for c in calls), ModelTurn(content="Done")]
+    )
+    # ScriptedFake + scripted tool results isolate report state from subprocess behavior.
+    execute = AsyncMock(side_effect=results)
+    monkeypatch.setattr(agent.executor, "execute", execute)
+    report = await agent.run("edit, verify, and edit the same file again")
+    assert report.status == "completed"
+    assert report.verification == expected
+    assert report.changed_files == ["a.py"]
+    assert execute.await_count == len(calls)
+    validate_messages(agent.messages)
