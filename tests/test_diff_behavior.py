@@ -218,3 +218,13 @@ async def test_oversized_index_cannot_hide_behind_small_worktree(tmp_path):
     directory = await diff(executor)
     assert directory.status == "ok" and directory.data["skipped_files"] >= 1
     assert "small = 1" not in directory.data["diff"]
+
+
+async def test_staged_mode_only_change_is_not_silently_empty(tmp_path):
+    _, executor = setup(tmp_path)
+    (tmp_path / "a.py").write_text("value = 1\n")
+    git(tmp_path, "update-index", "--chmod=+x", "a.py")
+    result = await diff(executor, "a.py")
+    assert result.status == "ok"
+    assert "[staged] a.py" in result.data["diff"]
+    assert "mode or encoding change" in result.data["diff"]

@@ -145,9 +145,9 @@ def read_git_diff(workspace: Workspace, relative: str, git: str) -> tuple[JsonOb
         if "??" in states:
             changes.append(("untracked", None, current))
         for section, before, after in changes:
-            if before == after:
-                continue
             header = f"[{section}] {name}\n"
+            if before == after:
+                header += "Git reports a mode or encoding change; decoded text is unchanged.\n"
             patch = difflib.unified_diff(
                 (before or "").splitlines(keepends=True),
                 (after or "").splitlines(keepends=True),
