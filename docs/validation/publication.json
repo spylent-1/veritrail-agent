@@ -2,7 +2,7 @@
   "project": "VeriTrail",
   "date": "2026-10-18",
   "timezone": "Asia/Shanghai",
-  "tested_code_revision": "7943212841e79fa0c7e41bf542ae2179a072b875",
+  "tested_code_revision": "d4fdb5487ba0d769c473600021eb810dc40731c9",
   "tested_file_sha256": {
     ".python-version": "7b55f8e67b5623c4bef3fa691288da9437d79d3aba156de48d481db32ac7d16d",
     "evals/__init__.py": "2e330d406d5194c45b8b11ae0300a24ff8eac7e9d34f10dcf616fa2237d424e6",
@@ -46,7 +46,7 @@
     "tests/fixtures/python-project/test_shop.py": "788b98d88ba8925765dda1e4ea484776f54dcf7654a0d966554a7546f3ded6ff",
     "tests/test_agent.py": "719c73fa67c5b0bd9c9660eabdba9fc26242bf98872624fa7477dbefc040e4b6",
     "tests/test_bootstrap.py": "0e05f5ee983f9a001ba7f77334ed39962c492fca567aea8534e5abcaf353d9f0",
-    "tests/test_chat.py": "e8ef79dda9ac355a8f173870bf7f800a894dcc28373d7bf6c28fbfe24a7d2e3a",
+    "tests/test_chat.py": "5a932b23ad73daa6303400c40faee9d1f110c97170564c3c6811a71b225c0576",
     "tests/test_context.py": "259ff81e12903266009cbdacb8c4c0a021abf06e42ff5326404919a5b0f113ae",
     "tests/test_deepseek.py": "4d146e5986b919fc2944649e205c6b53e65c343893f521506f2eb1cead255742",
     "tests/test_diff_behavior.py": "3ab9066cf89d20fb98c6923aa4a1ba20f743538d2ffc2e3720f9bf5527100e97",
@@ -75,7 +75,7 @@
       "passed": 145,
       "failed": 0,
       "skipped": 0,
-      "seconds": 38.52
+      "seconds": 38.81
     },
     "ruff_check": "passed",
     "ruff_format_check": "passed",
@@ -111,5 +111,11 @@
     "bilingual_docs_in_sdist": true,
     "private_runtime_paths_excluded": true,
     "wheel_sha256": "c6629d904b558fe7f409a42481075208f240897110129742f6bb3e21d5ae70db"
+  },
+  "remote_initial_run": {
+    "url": "https://github.com/spylent-1/veritrail-agent/actions/runs/39095254210",
+    "result": "failed_help_text_ANSI_assertion",
+    "fix": "strip_terminal_styles_and_test_forced_color",
+    "runtime_code_change": false
   }
 }

@@ -80,3 +80,8 @@ MCP 和进程清理使用真实 Windows 子进程。本次未新增付费模型�
 
 补充 `7d6676d` 覆盖仅权限变化的 Git 差异；品牌兼容提交 `7943212`。最终 145 tests（38.52 秒）、
 静态门禁、构建及独立安装通过；已确认安装源码与测试源码逐文件哈希一致。
+
+首次远端 CI 在 Ubuntu 的帮助文案断言失败：彩色 ANSI 样式插入选项名导致字符串不连续；
+测试先清理样式并强制覆盖彩色场景，未改变 CLI 运行逻辑。矩阵关闭 fail-fast，以便两平台独立完成。
+修复后本地全量 145 tests 通过（38.81 秒），Ruff / 格式 / mypy / git diff --check 通过。
+首次运行记录：https://github.com/spylent-1/veritrail-agent/actions/runs/39095254210 。

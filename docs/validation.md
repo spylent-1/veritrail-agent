@@ -14,7 +14,7 @@ Three reliability fixes were committed independently:
 
 The reliability-fix stage passed **144 local tests in 39.46 seconds**, plus Ruff, formatting, mypy and `git diff --check`. Tests include ScriptedFake model flows and real Windows Git, pytest, Maven and MCP subprocesses. Scripted model completion is not real-model evidence.
 
-The final branded source passed **145 tests in 38.52 seconds**, including an additional mode-only Git change regression. Brand compatibility and package installation are checked separately. The [publication summary](validation/publication.json) binds those checks to source-file fingerprints. Current remote Windows/Ubuntu results are available through [the commit-associated Actions runs](https://github.com/spylent-1/veritrail-agent/actions/workflows/ci.yml); the badge is a live status display, not a historical local-test claim. No new paid model evaluation is included in these publication checks.
+The final branded source passed **145 tests in 38.81 seconds**, including an additional mode-only Git change regression. Brand compatibility and package installation are checked separately. The [publication summary](validation/publication.json) binds those checks to source-file fingerprints. Current remote Windows/Ubuntu results are available through [the commit-associated Actions runs](https://github.com/spylent-1/veritrail-agent/actions/workflows/ci.yml); the badge is a live status display, not a historical local-test claim. No new paid model evaluation is included in these publication checks.
 
 ## Historical real-model benchmark
 

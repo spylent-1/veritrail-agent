@@ -9,7 +9,7 @@
 Ruff、格式检查、mypy 和 git diff --check 通过。测试包含 ScriptedFake 模型流程与真实 Windows
 Git、pytest、Maven 和 MCP 子进程；未新增付费模型评测。
 
-最终更名源码含仅权限变化的 Git 回归，共 145 tests 通过（38.52 秒）。
+最终更名源码含仅权限变化的 Git 回归，共 145 tests 通过（38.81 秒）。
 英文优先的双语包装、更名兼容和安装检查单独验收，最终安装及源码指纹见
 [发布验收摘要](../validation/publication.json)。远端 Windows/Ubuntu 状态以
 [对应提交的 Actions](https://github.com/spylent-1/veritrail-agent/actions/workflows/ci.yml) 为准。
