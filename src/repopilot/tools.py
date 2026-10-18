@@ -243,22 +243,42 @@ class ReadTools:
         end = min(args["end_line"], start + 199, max(1, len(lines)))
         if start > max(1, len(lines)) or end < start:
             raise RepoPilotError("INVALID_RANGE", "Requested line range is outside the file.")
-        selected = lines[start - 1 : end]
-        rendered = "\n".join(f"{start + i}: {line[:1000]}" for i, line in enumerate(selected))
-        truncated = end < min(args["end_line"], len(lines)) or len(rendered.encode()) > 12000
-        # Only grant a hash observation when the requested text has been returned.
-        self.observed[snap.path] = snap.sha256
-        ref = self._ref(snap.path, start, end, snap.sha256)
-        return ToolOutput(
-            {
-                "path": snap.path,
-                "sha256": snap.sha256,
-                "total_lines": len(lines),
-                "text": rendered.encode()[:12000].decode("utf-8", errors="ignore"),
-            },
-            [ref],
-            truncated,
-        )
+        requested_end = min(args["end_line"], len(lines))
+        rendered: list[str] = []
+        used = 0
+        partial_line: int | None = None
+        for number in range(start, end + 1):
+            if not lines:
+                break
+            line = f"{number}: {lines[number - 1]}"
+            size = len(line.encode("utf-8")) + bool(rendered)
+            if used + size > 12000:
+                if not rendered:
+                    # A partial preview must never authorize a complete-line citation.
+                    rendered.append(line.encode("utf-8")[:12000].decode("utf-8", errors="ignore"))
+                    partial_line = number
+                break
+            rendered.append(line)
+            used += size
+        complete_count = len(rendered) if partial_line is None else 0
+        returned_end = start + complete_count - 1
+        truncated = bool(lines) and returned_end < requested_end
+        data: JsonObject = {
+            "path": snap.path,
+            "sha256": snap.sha256,
+            "total_lines": len(lines),
+            "text": "\n".join(rendered),
+        }
+        if truncated:
+            data["next_start_line"] = returned_end + 1
+            data["notice"] = "Output truncated; request a smaller line range before editing."
+        if partial_line is not None:
+            data["partial_line"] = partial_line
+            data["notice"] = "Source line exceeds the byte limit; partial preview has no evidence."
+        if not truncated:
+            self.observed[snap.path] = snap.sha256
+        refs = [self._ref(snap.path, start, returned_end, snap.sha256)] if complete_count else []
+        return ToolOutput(data, refs, truncated)
 
     def _grep(self, args: JsonObject) -> list[JsonObject]:
         deadline = time.monotonic() + 10
