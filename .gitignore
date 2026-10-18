@@ -1,15 +1,49 @@
+# Python environments and caches
 .venv/
+venv/
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-.coverage
+
+# Build and test output
+build/
 dist/
 *.egg-info/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+target/
+
+# Local IDE and OS files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Credentials: keep the empty example tracked
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+id_rsa*
+id_ed25519*
+
+# Private runtime state, snapshots and evaluation workspaces
 .repopilot/
-target/
 .eval-runs/
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.log

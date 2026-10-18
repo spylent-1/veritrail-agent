@@ -5,14 +5,14 @@ base_url = "https://api.deepseek.com"
 
 [tests.python-unit]
 kind = "pytest"
-executable = 'D:\PythonProjection\AgentCli\.venv\Scripts\python.exe'
+executable = 'D:\path\to\veritrail-agent\.venv\Scripts\python.exe'
 args = ["-q"]
 cwd = "."
 timeout = 180
 
 [tests.java-unit]
 kind = "maven"
-executable = 'D:\Maven\apache-maven-3.9.14\bin\mvn.cmd'
+executable = 'D:\path\to\apache-maven\bin\mvn.cmd'
 args = ["-q"]
 cwd = "."
 timeout = 180

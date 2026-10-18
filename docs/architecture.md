@@ -1,63 +1,78 @@
-# 调用链与模块边界
+# Architecture
+
+English · [简体中文](zh-CN/architecture.md)
+
+## One execution boundary
 
 `cli.run → application.run_task → AgentRunner.run → ContextBuilder.build → DeepSeekProvider.complete`
-收到结构化调用后：`ToolExecutor.execute → 参数校验 → PolicyEngine → prepare → 用户审批 →
-SQLite tool_intent → commit → ToolResult → tool_call_id 配对回传`。
+
+Structured tool requests follow:
+`ToolExecutor.execute → argument validation → PolicyEngine → prepare → user approval → SQLite tool_intent → commit → ToolResult paired by tool_call_id`.
 
 ```mermaid
 flowchart TD
-  CLI[CLI 输入与展示] --> App[Application 装配与工作区锁]
-  App --> Loop[顺序 Agent Loop]
-  Loop --> Context[上下文视图]
-  Context --> Provider[DeepSeek Adapter]
-  Provider --> Loop
-  Loop --> Exec[ToolExecutor]
-  Exec --> Policy[策略与具体审批]
-  Policy --> Local[读取 / 编辑 / 测试]
-  Policy --> MCP[MCP 适配器]
-  Loop --> Store[SQLite 消息与事件]
-  Exec --> Store
-  Local --> Snap[外部工件目录]
+    CLI[CLI input and presentation] --> App[Application / workspace lock]
+    App --> Loop[Sequential agent loop]
+    Loop --> Context[Bounded context view]
+    Context --> Provider[DeepSeek adapter]
+    Provider --> Loop
+    Loop --> Executor[ToolExecutor]
+    Executor --> Policy[Policy / concrete approval]
+    Policy --> Local[Files / tests]
+    Policy --> MCP[MCP adapter]
+    Loop --> Store[(SQLite messages / events)]
+    Executor --> Store
+    Local --> Snapshots[Private artifacts / snapshots]
 ```
 
-## 三个需要区分的状态
+## Three different outcomes
 
-- `status=completed`：模型完整结束回答；不是业务结果正确的证明。
-- `verification=passed`：某次测试进程和新鲜 JUnit 报告都通过；随后再次编辑会清除此状态。
-- 独立评测 `passed=true`：代码通过工作区外的验收，或者定位引用通过当前路径/行号/哈希校验。
+- `status=completed`: the model finished its answer; this does not establish correctness.
+- `verification=passed`: a test process and fresh JUnit reports established a passing run. Every successful agent write clears earlier verification. External changes are not continuously monitored.
+- Independent evaluation `passed=true`: an external grader accepted the resulting code or checked localization citations against paths, lines and current hashes.
 
-一次运行默认最多 20 次模型响应、40 次工具调用、15 分钟主动执行。审批等待不计主动时间。
-模型请求有独立超时，暂时性错误最多额外重试两次；SDK 的自动重试关闭。
-ToolExecutor 不自动重放编辑、测试或 MCP 操作。
+Default budgets are 20 model responses, 40 tool calls and 15 minutes of active execution. Approval waiting is excluded. Model calls have separate timeouts; transient provider errors receive at most two extra attempts with SDK retries disabled. ToolExecutor never automatically replays edits, tests or MCP calls.
 
-## 消息、上下文和持久化
+## Messages, context and persistence
 
-完整 Message 保存到 SQLite；ContextBuilder 创建副本，优先裁剪旧工具的大段正文，随后移除
-较早的完整 user 轮次。保留系统约束、当前用户任务和最近工具组。容量计算包含工具 Schema，
-限制是序列化输入字节数，不是精确 Token 数。Provider 返回的 usage 单独累计；请求失败或重试
-缺少 usage 时标记不完整，不能据此推导账单精确金额。
+Full messages are stored in SQLite. ContextBuilder creates a view: it first shortens large historical tool bodies, then drops older complete user turns. System constraints, the current task and recent tool groups are retained. Capacity includes tool schemas and measures serialized input bytes, not exact tokens. Provider usage is accumulated separately and marked incomplete when a request or retry has missing usage; it is not an exact billing calculation.
 
-SQLite 表：sessions、runs、messages、events、tool_executions。消息与对应事件在同一事务中
-保存。JSONL 是读取 events 后导出。文件快照和有大小上限的日志保存在宿主状态目录。
+SQLite stores `sessions`, `runs`, `messages`, `events` and `tool_executions`. Messages and their events share a transaction. JSONL is exported from saved events, rather than written as a competing journal. Source snapshots and bounded logs live in the private host state directory.
 
-恢复检查未完成工具组。文件与目标哈希相同才能确认写入；与原始哈希相同则不重放；其余情况
-保持未知。测试和外部调用中断时不猜测结果。继续会话的读取授权和用户审批均不复用。
+Recovery inspects unfinished tool groups. A file matching the target hash can establish a completed write; an original hash does not cause replay, and conflicting content stays unknown. Interrupted tests and external calls remain unknown. Session continuation never reuses read grants or approvals.
 
-## 编辑与回退
+## Edits and rollback
 
-edit_file 使用 expected_hash 和唯一匹配的旧文本；多个替换必须不重叠。保留 UTF-8/BOM、
-LF/CRLF。预览后再次校验当前文件，再写同目录临时文件并替换。create_file 使用原子
-create-if-absent。保存的是本轮修改前快照，不依赖整个 Git 工作区是否干净。
+`edit_file` requires an observed `expected_hash` and uniquely matching old text. Replacement ranges cannot overlap. UTF-8, BOM and LF/CRLF are preserved. After approval, the current hash is checked again before a same-directory temporary file is atomically substituted. `create_file` uses atomic create-if-absent behavior. Snapshots preserve the original bytes, including existing user edits.
 
-rollback 是明确的宿主操作，也经 ToolExecutor 审批和审计。先校验完整逆序修改链，再逐文件
-恢复；冲突时拒绝覆盖。多文件操作不是跨文件事务，执行过程中出现新的并发修改仍可能部分
-完成，需要检查 Trace 和现场。未承诺跨文件、SQLite 与子进程的 exactly-once 执行。
+Rollback is an explicit host operation routed through ToolExecutor. It validates the reverse edit chain before restoring files and refuses conflicts. Multi-file rollback is not a transaction: a concurrent change can still cause partial completion. Inspect the trace and files after interruption. There is no exactly-once guarantee spanning files, SQLite and subprocesses.
 
-## MCP
+## File evidence and Git state
 
-官方 mcp 2.3.0 管理 stdio 进程。只连接显式选择且配置过的 Server，启动和每次调用各自审批。
-工具名称带命名空间和短哈希；输入用 jsonschema 校验。不支持的 Schema 直接拒绝注册。
-只传文本与受限 JSON，不自动读取 resource links。外部结果不是文件 EvidenceRef。
+Reads return complete lines within a 12KB text budget, then create EvidenceRef ranges for those lines. An oversized single line receives a partial preview without a complete-line citation. Empty files have no invented source-line evidence. Incomplete requested ranges do not grant fresh read authorization; use a smaller range before editing.
 
-使用 legacy 协议协商和低层 session.call_tool，避开高层自动工具重试及 input-required 重放。
-连接失败后禁用，不自动重连。本地控制不能约束 Server 进程的操作系统权限。
+Git output separates `[staged]`, `[unstaged]` and `[untracked]` changes, including deletions and unborn repositories. Renames appear as deletion plus addition. Historical, index and worktree content all receive path, encoding, size and link checks. A request is bounded to 200 changed paths and 16KiB of diff text; truncation is explicit. Changes can include pre-existing user work.
+
+## MCP lifecycle
+
+The locked MCP SDK manages stdio servers. Only explicitly selected host-configured servers are connected. Startup and each tool call require separate approvals. Tool names use namespaces and short hashes; JSON Schema validates inputs, and unsupported schemas are rejected at registration. Only text and bounded JSON are passed through. Resource links are not automatically fetched. External results are not file EvidenceRef objects.
+
+Legacy protocol negotiation and low-level `session.call_tool` avoid implicit high-level tool retries or input-required replay. Failed connections are disabled rather than automatically reconnected. Local controls do not restrict the server's OS permissions.
+
+## MCP setup
+
+Add a server to the host file `~/.repopilot/config.toml`, replacing the example paths:
+
+```toml
+[mcp.docs]
+executable = 'D:\path\to\veritrail-agent\.venv\Scripts\python.exe'
+args = ['-m', 'repopilot.mcp_sample', '--root', 'D:\path\to\veritrail-agent\docs']
+tools = ['get_project_conventions']
+timeout = 20
+```
+
+Start explicitly with `python -m uv run veritrail chat --mcp docs`. Server startup and calls are approved separately. Repository MCP configuration is never automatically loaded; external servers are not automatically installed. On POSIX, use absolute paths to the installed Python executable and directory.
+
+## Brand compatibility
+
+The distribution is `veritrail-agent`, with `veritrail` as the primary CLI and `repopilot` as an alias. Internal Python imports remain `repopilot`. Host state stays under `~/.repopilot`, honoring `REPOPILOT_HOME`. The SQLite schema is unchanged and existing sessions need no migration.

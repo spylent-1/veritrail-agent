@@ -1,51 +1,60 @@
-# v0.1.0 验收记录
+# Validation and evidence
 
-验证日期：2026-10-12（Asia/Shanghai）。计划版本 V2.0，产品版本 v0.1.0。
+English · [简体中文](zh-CN/validation.md)
 
-## 真实模型固定样本
+## VeriTrail publication checks — 2026-10-18
 
-来源版本：`095e4027ec7773582feea0035f4bcc427ba3c93f`。默认模型 `deepseek-flash`，thinking disabled。
-每个任务使用全新工作区和固定起始提交；完整配置、锁文件哈希、样本哈希、提交与逐项数据见
-[benchmark.json](validation/benchmark.json)。模型别名不能冻结服务端权重，数据只代表本次运行。
+Three reliability fixes were committed independently:
 
-| 类型 | 严格通过 | 样本数 |
-|---|---:|---:|
-| Java/Python 代码定位 | 15 | 18 |
-| Java/Python 代码修复＋独立验收 | 18 | 18 |
+| Fix | Commit | Acceptance |
+| --- | --- | --- |
+| Invalidate verification on every successful write | `8f8529a` | Repeated edit/test/edit flow, failed and denied edits, retesting |
+| Bind read evidence to returned complete lines | `a01ff6e` | Byte limits, multibyte text, partial lines, empty files, read grants |
+| Include complete Git state with versioned-content checks | `afbb0d0` | Staged/unstaged/untracked, deletion, unborn repos, literal paths, links, binary/large index blobs |
 
-满足计划的定位 ≥15/18、修改 ≥12/18 门槛。EJ1、EP1 各连续三次通过，分别演示 Maven/JUnit 与
-pytest 的“原始失败→局部修改→测试通过”。共 153 次模型响应、223 次工具调用；返回 usage
-累计输入 402485、输出 32033 tokens；逐次耗时相加 332.8 秒。不是并发吞吐测试或通用能力排名。
+The reliability-fix stage passed **144 local tests in 39.46 seconds**, plus Ruff, formatting, mypy and `git diff --check`. Tests include ScriptedFake model flows and real Windows Git, pytest, Maven and MCP subprocesses. Scripted model completion is not real-model evidence.
 
-三个定位失败：LJ3 第 3 次、LJ4 第 3 次、LP1 第 1 次。实际回答定位了目标源码，但没有满足
-严格的 `[E编号]` 引用格式或方法声明行覆盖规则；未把这些结果改记为通过。定位评分检查路径、
-方法名、引用行号与当前哈希，并不能自动证明自然语言分析的所有推断正确。
+The final branded source passed **145 tests in 38.52 seconds**, including an additional mode-only Git change regression. Brand compatibility and package installation are checked separately. The [publication summary](validation/publication.json) binds those checks to source-file fingerprints. Current remote Windows/Ubuntu results are available through [the commit-associated Actions runs](https://github.com/spylent-1/veritrail-agent/actions/workflows/ci.yml); the badge is a live status display, not a historical local-test claim. No new paid model evaluation is included in these publication checks.
 
-原始 SQLite、Trace、工作区、报告与独立评分输出保存在 `.eval-runs/live-v0.1.0/`，目录名对应
-benchmark.json 的 artifacts 字段。文件未包含进 Git；在本机保留用于复核。
+## Historical real-model benchmark
 
-## 真实 MCP 与自维护
+Date: 2026-10-12, Asia/Shanghai. Source commit: `095e4027ec7773582feea0035f4bcc427ba3c93f`. Product version: `0.1.0`, then named RepoPilot. Model: `deepseek-flash`, thinking disabled.
 
-- 真实 stdio 示例 Server 被 DeepSeek 自动调用：2 轮模型、1 次 MCP 工具。
-  [首次 MCP 报告](validation/mcp-live.json) 中出现不存在的 E1，运行时明确告警，未伪装成有效引用。
-- 自维护任务使用 RepoPilot 自己的源码副本，修复目录 git_diff 遇到二进制文件时整体失败的问题。
-  [首次报告](validation/self-maintenance-initial.json)：7 轮模型、8 次工具，根目录测试通过。
-- 评审补充子目录测试后，恢复同一会话再运行：5 轮模型、6 次工具，三个回归测试通过，且最终
-  引用无告警。完整证据见 [自维护与会话继续](validation/self-maintenance.json)。
-- 已审阅并合入其局部修复；没有直接让模型操作原始开发目录。固定 36 次评测针对上述来源版本，
-  后续 git_diff 修复另外运行回归验证，未把基线冒充修改后的重跑结果。
+Each of 12 fixed Java/Python tasks ran three times in a fresh workspace at a fixed starting commit. The original [benchmark.json](validation/benchmark.json) contains configuration, lockfile and fixture hashes, commits and individual outcomes. A model alias does not freeze server-side weights.
 
-## 本地与远端边界
+| Category | Strict passes | Runs |
+| --- | ---: | ---: |
+| Source localization | 15 | 18 |
+| Code repair with independent acceptance | 18 | 18 |
 
-本地运行了真实 Windows 子进程、Maven、pytest、MCP、文件写入、工作区锁、恢复和回退测试。
-Ruff、格式检查、Windows/Linux 两种平台的 mypy 检查均通过。
+This met the planned localization threshold of 15/18 and repair threshold of 12/18. EJ1 and EP1 each passed three consecutive attempts, exercising Maven/JUnit and pytest from original failure to accepted repair. There were 153 model responses and 223 tool calls. Returned usage totaled 402485 input and 32033 output tokens; summed run duration was 332.8 seconds. These are fixed-fixture observations, not throughput measurements or general capability rankings.
 
-GitHub Actions 已配置 Windows 与 Ubuntu；尚未推送仓库，远端 CI 和 Ubuntu 运行时未验证。
-没有真实生产项目的大规模编码评测，也没有生产沙箱、RAG 或多智能体实现。
+Localization failures were LJ3 attempt 3, LJ4 attempt 3 and LP1 attempt 1. Answers found the intended code but failed strict evidence-ID formatting or method-declaration-line coverage. They remain failures. Graders check cited paths, lines and current hashes; they do not prove every natural-language inference correct.
 
-最终离线门禁为 113 项测试通过，Ruff 检查与格式检查通过。构建 wheel 与 sdist 后，在独立
-虚拟环境中安装 wheel，确认导入来自该环境的 site-packages，六个命令均出现在帮助中，
-无 API Key 时 doctor 与会话查询正常运行，且未调用模型。安装记录见
-[install-smoke.json](validation/install-smoke.json)，构建文件位于本地 dist/。
+Raw SQLite, trace, workspace, report and independent-grader artifacts remain in the local ignored `.eval-runs/live-v0.1.0/` directory. The public repository includes selected summaries, not the private raw artifacts. Historical summaries retain original names, paths and hashes and are not rewritten as current-version results.
 
-运行结果与源码学习能力分别验收；学习练习仍需使用者亲自完成。
+## Historical MCP and self-maintenance evidence
+
+- A real stdio example server was called through DeepSeek in 2 model turns and 1 tool call. The [first MCP report](validation/mcp-live.json) contained an invented E1 citation that the runtime flagged as unknown.
+- A self-maintenance task used an isolated source copy to fix directory diffs failing on binary content. The [initial report](validation/self-maintenance-initial.json) records 7 model turns, 8 tool calls and passing root-level tests.
+- After subdirectory regressions were added, the same session continued for 5 model turns and 6 tool calls. Three regressions passed with no final citation warning; see [the follow-up report](validation/self-maintenance.json).
+- The local fix was reviewed and integrated. The 36-run benchmark remains tied to the earlier source commit; later fixes were separately tested rather than presented as a benchmark rerun.
+
+## Historical delivery boundary
+
+The original delivery ran real Windows subprocess, Maven, pytest, MCP, filesystem, workspace-lock, recovery and rollback checks. Ruff, formatting and Windows/Linux-targeted mypy passed. Remote CI and Ubuntu runtime had not yet been verified at that historical delivery.
+
+That delivery's final gate was 113 tests. Wheel and sdist builds were installed into an independent environment, imports came from site-packages, six then-existing commands were visible, and doctor/session queries worked without an API key. The original [installation report](validation/install-smoke.json) remains unchanged. A later continuous-chat change raised the local total to 125; see [development history (Chinese)](progress.md).
+
+No large production-repository model evaluation, production sandbox, RAG or multi-agent capability is claimed. Runtime results do not establish that a reader has completed the source-study exercises.
+
+## Reproducing evaluations
+
+```sh
+# Check independent graders without model calls
+python -m uv run python -m evals.run --check-graders
+# Optional paid real-model benchmark: 12 tasks x 3 repeats
+python -m uv run python -m evals.run --repeats 3 --output .eval-runs/live
+```
+
+Evaluation approval is limited to disposable fixtures and fixed test profiles. Maven can download pinned fixture dependencies on the first run. Partial runs do not count as a complete release evaluation. Keep raw artifacts in the ignored output directory.

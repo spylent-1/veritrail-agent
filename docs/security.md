@@ -1,24 +1,17 @@
-# 信任边界
+# Trust and security boundaries
 
-RepoPilot 用于个人信任的仓库，编辑、测试和外部工具运行在宿主机用户权限下。命令白名单不是
-OS 沙箱；pytest、Maven 的项目代码、插件及 MCP Server 都能执行自己的逻辑。
+English · [简体中文](zh-CN/security.md)
 
-模型不能修改宿主策略。默认 read 模式不注册编辑或测试工具；edit 模式逐次确认；MCP 需
-单独显式启用。非交互终端拒绝副作用；产品没有自动批准所有操作的参数。评测中的授权处理器
-仅接受一次性夹具的指定源码文件和固定测试 profile，不进入已安装 CLI。
+VeriTrail is intended for repositories you trust. Edits, tests and external tools run with the host user's permissions. A command allow-list is not an OS sandbox: pytest code, Maven plugins and MCP servers can execute their own logic.
 
-内置文件工具共用 Workspace：相对路径、敏感文件过滤、链接/junction/硬链接拒绝、文件大小
-上限及 UTF-8 检查。读取与检索都排除密钥、内部状态和生成目录。普通忽略文件不是安全规则。
-默认状态目录为 ~/.repopilot，存有私有源码快照；请按个人私有资料管理，不提交到仓库。
+The model cannot alter host policy. Read mode does not register editing or testing tools. Edit mode asks for each concrete operation; MCP requires separate explicit selection. Non-interactive terminals refuse side effects. There is no approve-all flag. Evaluation-only approval handlers authorize specified files and fixed test profiles in disposable fixtures; they are not included in the installed CLI.
 
-仅读取宿主环境中的 DEEPSEEK_API_KEY，已知密钥值和终端控制字符从展示文本与工具日志中清理。
-编辑快照保存原始文件字节以供恢复，不进行脱敏，应视为私有源码资料。
-此机制不是任意秘密的检测器，不能保证识别仓库中所有硬编码凭证。模型请求会将允许读取的
-源码发送给配置的模型服务，使用前应确认仓库适合这样处理。
+Built-in file tools share Workspace checks: relative paths, sensitive-file filtering, rejection of symlinks/junctions/hard links, size limits and UTF-8 validation. Reads and searches exclude secrets, internal state and generated directories. Git diffs also check historical and index content. Ordinary ignore files are not security rules. The default host directory, `~/.repopilot`, contains private source snapshots and must not be committed.
 
-测试和 MCP 子进程使用精简环境，不继承模型密钥。测试只能选择宿主的命名配置，不能提交
-命令或额外参数。Windows Maven 固定入口为已安装 mvn.cmd，拒绝 Shell 特殊字符；内部仍是
-批处理启动机制。测试超时和取消清理普通子进程树；未承诺隔离恶意进程或限制网络访问。
+The API key is read only from the host's `DEEPSEEK_API_KEY` environment variable. Known key values and terminal control sequences are removed from presentation and tool logs. Recovery snapshots preserve original file bytes without redaction and must be treated as private source material. Filtering is not a general secret detector and cannot identify every hard-coded credential. Allowed source content is sent to the configured model service; ensure your repository can be processed this way.
 
-审批绑定实际差异或 argv/cwd 等操作参数。文件写入与回退在执行前再次核验哈希。不能保证
-抵抗另一个恶意本地进程的并发替换，也不对不受信任的数据库、构建插件或 Server 提供沙箱。
+Tests and MCP subprocesses use a reduced environment without the model key. Tests select named host profiles; model-supplied commands and extra arguments are rejected. Windows Maven uses an installed `mvn.cmd`, rejects shell metacharacters, and still relies on the batch launcher internally. Timeouts and cancellation clean up ordinary subprocess trees. Malicious processes and network access are not isolated.
+
+Approvals bind to concrete diffs or argv/cwd parameters. Writes and rollback recheck file hashes before execution. Another malicious local process can still race filesystem replacement. Untrusted databases, build plugins and servers receive no sandbox guarantees.
+
+Verification describes the observed test result. Every successful agent write invalidates earlier verification, but changes made outside the agent require inspection and fresh tests. A completed model answer alone is never test success.
