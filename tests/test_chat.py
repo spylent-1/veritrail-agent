@@ -11,6 +11,7 @@ from repopilot.config import Settings
 from repopilot.errors import RepoPilotError
 from repopilot.models import ModelTurn, ToolCall, validate_messages
 from repopilot.providers import ScriptedFake
+from repopilot.sanitize import clean
 from repopilot.store import SessionStore
 
 
@@ -238,7 +239,10 @@ def test_chat_missing_key_fails_before_prompt(chat_env, monkeypatch):
     assert result.exit_code == 2 and "KEY_MISSING" in result.output
 
 
-def test_chat_help_describes_session_and_mode():
+def test_chat_help_describes_session_and_mode(monkeypatch):
+    # Rich can put ANSI style boundaries inside option names on CI terminals.
+    monkeypatch.setenv("FORCE_COLOR", "1")
     result = CliRunner().invoke(app, ["chat", "--help"])
     assert result.exit_code == 0
-    assert "--session" in result.output and "--mode" in result.output
+    output = clean(result.output)
+    assert "--session" in output and "--mode" in output
