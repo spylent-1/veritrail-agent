@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from repopilot.config import Limits, StrictModel
 from repopilot.errors import RepoPilotError
+from repopilot.git_diff import read_git_diff
 from repopilot.models import EvidenceRef, JsonObject, ToolCall, ToolResult
 from repopilot.safety import ApprovalHandler, DenyApproval, PolicyEngine, PreparedAction
 from repopilot.sanitize import clean, clean_data
@@ -340,58 +341,8 @@ class ReadTools:
         git = shutil.which("git")
         if not git:
             raise RepoPilotError("GIT_MISSING", "Install Git first.")
-        selected = self.workspace.resolve(args["path"], allow_root=True)
-        directory_scope = selected.is_dir()
-        candidates = (
-            self.workspace.list_files(args["path"], limit=201)
-            if directory_scope
-            else [selected.relative_to(self.workspace.root).as_posix()]
-        )
-        if len(candidates) > 200:
-            raise RepoPilotError("DIFF_TOO_BROAD", "Specify a smaller directory or file.")
-        diffs: list[str] = []
-        for relative in candidates:
-            try:
-                self.workspace.snapshot(relative)
-            except RepoPilotError as exc:
-                # Directory-wide diff skips non-text or oversized files.
-                # Explicit file requests still surface the original error.
-                if not directory_scope or exc.code not in (
-                    "UNSUPPORTED_ENCODING",
-                    "FILE_TOO_LARGE",
-                ):
-                    raise
-                continue
-            result = await asyncio.to_thread(
-                subprocess.run,
-                [
-                    git,
-                    "-c",
-                    "core.fsmonitor=false",
-                    "diff",
-                    "--no-ext-diff",
-                    "--no-textconv",
-                    "--",
-                    relative,
-                ],
-                cwd=self.workspace.root,
-                capture_output=True,
-                timeout=5,
-                check=False,
-            )
-            if result.returncode:
-                raise RepoPilotError("GIT_DIFF_FAILED", "Git diff failed; check repository setup.")
-            diffs.append(result.stdout.decode("utf-8", errors="replace"))
-            if sum(len(part.encode()) for part in diffs) >= 16384:
-                break
-        raw = "".join(diffs).encode()
-        return ToolOutput(
-            {
-                "diff": raw[:16384].decode("utf-8", errors="ignore"),
-                "scope": "Git working tree; may include pre-existing user changes.",
-            },
-            truncated=len(raw) > 16384,
-        )
+        data, truncated = await asyncio.to_thread(read_git_diff, self.workspace, args["path"], git)
+        return ToolOutput(data, truncated=truncated)
 
     def register(self, registry: ToolRegistry) -> None:
         registry.register(
