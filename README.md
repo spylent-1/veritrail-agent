@@ -135,6 +135,10 @@ This release focuses on a single sequential agent. RAG, long-term memory, Skills
 
 [Development history (中文)](docs/progress.md) · [Source-reading exercises (中文)](docs/learning.md) · [Publication checklist (中文)](docs/release-checklist.md)
 
+## Contributing
+
+Want to contribute? See the [contribution guide](CONTRIBUTING.md) for setup, checks and pull request guidance.
+
 ## License
 
 [MIT](LICENSE) © 2026 spylent-1.
