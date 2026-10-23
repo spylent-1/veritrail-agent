@@ -21,7 +21,7 @@ VeriTrail connects a sequential agent loop to your trusted Java or Python reposi
 | **Verification that stays current** | Test status comes from process results and fresh JUnit reports. Every successful agent write invalidates earlier verification. |
 | **Durable sessions** | SQLite is the authoritative journal; JSONL traces are derived exports. Continuing a session never reuses approvals or read grants. |
 | **Recoverable changes** | Exact-match edits, hash checks, atomic single-file writes and snapshots support conflict-aware recovery and rollback. |
-| **Explicit integrations** | DeepSeek provider  adapter, host-defined pytest/Maven profiles and allow-listed stdio MCP tools share the execution boundary. |
+| **Explicit integrations** | DeepSeek provider adapter, host-defined pytest/Maven profiles and allow-listed stdio MCP tools share the execution boundary. |
 
 ## Architecture
 
@@ -134,6 +134,10 @@ This release focuses on a single sequential agent. RAG, long-term memory, Skills
 | Validation and evidence | [Validation](docs/validation.md) | [验收记录](docs/zh-CN/validation.md) |
 
 [Development history (中文)](docs/progress.md) · [Source-reading exercises (中文)](docs/learning.md) · [Publication checklist (中文)](docs/release-checklist.md)
+
+## Contributing
+
+Want to contribute? See the [contribution guide](CONTRIBUTING.md) for setup, checks and pull request guidance.
 
 ## License
 
